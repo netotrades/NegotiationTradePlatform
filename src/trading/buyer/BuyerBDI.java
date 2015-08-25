@@ -33,6 +33,8 @@ import trading.INegotiationGoal;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order;
+import trading.strategy.Offer;
+import trading.strategy.StrategyCall;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,9 +63,17 @@ public class BuyerBDI implements INegotiationAgent
 	@Belief
 	protected List<NegotiationReport> reports = new ArrayList<NegotiationReport>();
 	
+	private ArrayList<Offer> offerHistory;
+	
 	protected Gui gui;
 	
 	private int historyPrice;
+	
+	private int currentRound;
+	
+	private int numberOfRounds;
+	
+	private StrategyCall strategy_call;
 	
 	/**
 	 *  The agent body.
@@ -180,6 +190,7 @@ public class BuyerBDI implements INegotiationAgent
 		String neg_strategy = order.getNegotiationStrategy();
 
 		if (neg_strategy.equals("strategy-1")) {
+			System.out.println("strategy - 1");
 			double time_span = order.getDeadline().getTime() - order.getStartTime();
 			double elapsed_time = getTime() - order.getStartTime();
 			double price_span = order.getLimit() - order.getStartPrice();
@@ -187,9 +198,20 @@ public class BuyerBDI implements INegotiationAgent
 		}
 
 		else if (neg_strategy.equals("strategy-2")) {
+			System.out.println("strategy - 2");
 			acceptable_price = historyPrice;
 			historyPrice = acceptable_price + 3;
 		}
+		
+		else if (neg_strategy.equals("strategy-3")) {
+			System.out.println("strategy - 3");
+			if (currentRound == 0) acceptable_price = order.getStartPrice();
+			else if(currentRound < numberOfRounds) 
+				strategy_call.callForStrategy(order.getLimit(),order.getDeadline(),offerHistory, numberOfRounds);
+			currentRound++;
+		}
+		
+		System.out.println("Buyer..." + acceptable_price);
 
 		// Find available seller agents.
 		IBuyBookService[]	services = agent.getServiceContainer().getRequiredServices("buyservice").get().toArray(new IBuyBookService[0]);
@@ -204,6 +226,7 @@ public class BuyerBDI implements INegotiationAgent
 		Future<Collection<Tuple2<IBuyBookService, Integer>>>	cfp	= new Future<Collection<Tuple2<IBuyBookService, Integer>>>();
 		final CollectionResultListener<Tuple2<IBuyBookService, Integer>>	crl	= new CollectionResultListener<Tuple2<IBuyBookService, Integer>>(services.length, true,
 			new DelegationResultListener<Collection<Tuple2<IBuyBookService, Integer>>>(cfp));
+		System.out.println(services.length);
 		for(int i=0; i<services.length; i++)
 		{
 			final IBuyBookService	seller	= services[i];
@@ -212,6 +235,8 @@ public class BuyerBDI implements INegotiationAgent
 				public void resultAvailable(Integer result)
 				{
 					crl.resultAvailable(new Tuple2<IBuyBookService, Integer>(seller, result));
+					System.out.println("Seller..." +result);
+					offerHistory.add(new Offer(result,new Date(),currentRound));
 				}
 				
 				public void exceptionOccurred(Exception exception)
@@ -290,7 +315,12 @@ public class BuyerBDI implements INegotiationAgent
 	 */
 	public void createGoal(Order order)
 	{
+		System.out.println("create Goal");
 		historyPrice = order.getStartPrice();
+		offerHistory = new ArrayList<Offer>();
+		strategy_call = new StrategyCall();
+		currentRound = 0;
+		numberOfRounds = 15;
 		PurchaseBook goal = new PurchaseBook(order);
 		agent.dispatchTopLevelGoal(goal);
 	}
@@ -318,8 +348,7 @@ public class BuyerBDI implements INegotiationAgent
 			}
 		}
 		return ret;
-	}
-	  
+	}  
 }
 
 

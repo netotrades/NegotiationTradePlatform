@@ -34,6 +34,8 @@ import trading.INegotiationGoal;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order;
+import trading.strategy.Offer;
+import trading.strategy.StrategyCall;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,10 +58,18 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	
 	@Belief
 	protected List<NegotiationReport> reports = new ArrayList<NegotiationReport>();
+	
+	private ArrayList<Offer> offerHistory;
 
 	protected Gui gui;
 	
 	private int historyPrice;
+	
+	private int currentRound;
+	
+	private int numberOfRounds;
+	
+	private StrategyCall strategy_call;
 	
 	/**
 	 *  The agent body.
@@ -285,6 +295,19 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 				acceptable_price = historyPrice;
 				historyPrice = acceptable_price - 2;
 			}
+			
+			else if (neg_strategy.equals("strategy-3")) {
+				acceptable_price = historyPrice;
+				historyPrice = acceptable_price - 2;
+			}
+			
+			else if (neg_strategy.equals("strategy-3")) {
+				System.out.println("strategy - 3");
+				if (currentRound == 0) acceptable_price = order.getStartPrice();
+				else if(currentRound < numberOfRounds) 
+					strategy_call.callForStrategy(order.getLimit(),order.getDeadline(),offerHistory, numberOfRounds);
+				currentRound++;
+			}
 
 			agent.getLogger().info(agent.getAgentName()+" proposed: " + acceptable_price);
 			
@@ -429,7 +452,12 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	 */
 	public void createGoal(Order order)
 	{
+		System.out.println("create Goal");
 		historyPrice = order.getStartPrice();
+		offerHistory = new ArrayList<Offer>();
+		strategy_call = new StrategyCall();
+		currentRound = 0;
+		numberOfRounds = 15;
 		SellBook goal = new SellBook(order);
 		agent.dispatchTopLevelGoal(goal);
 	}
