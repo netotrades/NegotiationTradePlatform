@@ -34,7 +34,7 @@ public class Gui extends JFrame
 	{
 		super((GuiPanel.isBuyer(agent)? "Buyer: ": "Seller: ")+agent.getComponentIdentifier().getName());
 		
-//			System.out.println("booktrading0: "+agent.getComponentIdentifier());
+//			System.out.println("itemtrading0: "+agent.getComponentIdentifier());
 		GuiPanel gp = new GuiPanel(agent);
 		
 		add(gp, BorderLayout.CENTER);
@@ -54,22 +54,22 @@ public class Gui extends JFrame
 		{
 			public void exceptionOccurred(Exception exception)
 			{
-//				System.out.println("booktrading5: "+agent.getComponentIdentifier());
+//				System.out.println("itemtrading5: "+agent.getComponentIdentifier());
 				dispose();
 			}
 			public void resultAvailable(Void result)
 			{
-//				System.out.println("booktrading6: "+agent.getComponentIdentifier());
+//				System.out.println("itemtrading6: "+agent.getComponentIdentifier());
 			}
 		};
 		
-//		System.out.println("booktrading1: "+agent.getComponentIdentifier());
+//		System.out.println("itemtrading1: "+agent.getComponentIdentifier());
 		agent.scheduleStep(new IComponentStep<Void>()
 		{
 			@Classname("dispose")
 			public IFuture<Void> execute(IInternalAccess ia)
 			{
-//				System.out.println("booktrading2: "+agent.getComponentIdentifier());
+//				System.out.println("itemtrading2: "+agent.getComponentIdentifier());
 				
 				ia.subscribeToEvents(IMonitoringEvent.TERMINATION_FILTER, false, PublishEventLevel.COARSE)
 					.addResultListener(new SwingIntermediateResultListener<IMonitoringEvent>(new IntermediateDefaultResultListener<IMonitoringEvent>()

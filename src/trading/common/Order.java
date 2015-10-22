@@ -9,7 +9,7 @@ import jadex.commons.beans.PropertyChangeListener;
 import java.util.Date;
 
 /**
- * The order for purchasing or selling books.
+ * The order for purchasing or selling items.
  */
 @Reference
 public class Order
@@ -27,8 +27,8 @@ public class Order
 
 	//-------- attributes --------
 
-	/** The book title. */
-	protected String title;
+	/** The item name. */
+	protected String name;
 
 	/** The deadline. */
 	protected Date deadline;
@@ -36,10 +36,10 @@ public class Order
 	/** The limit price. */
 	protected int limit;
 
-	/** The startprice. */
+	/** The start price. */
 	protected int startprice;
 
-	/** The starttime. */
+	/** The start time. */
 	protected long starttime;
 
 	/** The execution price. */
@@ -68,14 +68,14 @@ public class Order
 
 	/**
 	 * Create a new order.
-	 * @param title	The title.
+	 * @param name	The name.
 	 * @param deadline The deadline.
 	 * @param limit	The limit.
 	 * @param start	The start price
 	 */
-	public Order(String title, Date deadline, int start, int limit, boolean buyorder, IClockService clock, String negstrategy)
+	public Order(String name, Date deadline, int start, int limit, boolean buyorder, IClockService clock, String negstrategy)
 	{
-		this.title = title;
+		this.name = name;
 		this.startprice = start;
 		this.limit = limit;
 		this.buyorder = buyorder;
@@ -91,23 +91,23 @@ public class Order
 	//-------- methods --------
 
 	/**
-	 * Get the title.
-	 * @return The title.
+	 * Get the name.
+	 * @return The name.
 	 */
-	public String getTitle()
+	public String getName()
 	{
-		return title;
+		return name;
 	}
 
 	/**
-	 * Set the title.
-	 * @param title The title.
+	 * Set the name.
+	 * @param name The name.
 	 */
-	public void setTitle(String title)
+	public void setName(String name)
 	{
-		String oldtitle = this.title;
-		this.title = title;
-		pcs.firePropertyChange("title", oldtitle, title);
+		String oldName = this.name;
+		this.name = name;
+		pcs.firePropertyChange("name", oldName, name);
 	}
 
 	/**
@@ -330,7 +330,7 @@ public class Order
 	{
 		StringBuffer sbuf = new StringBuffer();
 		sbuf.append(isBuyOrder() ? "Buy '" : "Sell '");
-		sbuf.append(getTitle());
+		sbuf.append(getName());
 		sbuf.append("'");
 		return sbuf.toString();
 	}

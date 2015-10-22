@@ -27,7 +27,7 @@ import jadex.micro.annotation.Arguments;
 import jadex.micro.annotation.Binding;
 import jadex.micro.annotation.RequiredService;
 import jadex.micro.annotation.RequiredServices;
-import trading.IBuyBookService;
+import trading.IBuyItemService;
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
 import trading.common.Gui;
@@ -51,7 +51,7 @@ import javax.swing.SwingUtilities;
 @Agent
 @RequiredServices(
 {
-	@RequiredService(name="buyservice", type=IBuyBookService.class, multiple=true),
+	@RequiredService(name="buyservice", type=IBuyItemService.class, multiple=true),
 	@RequiredService(name="clockser", type=IClockService.class, binding=@Binding(scope=RequiredServiceInfo.SCOPE_PLATFORM))
 })
 @Arguments(@Argument(name="initial_orders", clazz=Order[].class))
@@ -118,15 +118,15 @@ public class BuyerBDI implements INegotiationAgent
 	}
 	
 	@Goal(recur=true, recurdelay=10000, unique=true)
-	public class PurchaseBook implements INegotiationGoal
+	public class PurchaseItem implements INegotiationGoal
 	{
 		@GoalParameter
 		protected Order order;
 
 		/**
-		 *  Create a new PurchaseBook. 
+		 *  Create a new PurchaseItem. 
 		 */
-		public PurchaseBook(Order order)
+		public PurchaseItem(Order order)
 		{
 			this.order = order;
 		}
@@ -162,8 +162,8 @@ public class BuyerBDI implements INegotiationAgent
 	{
 //		System.out.println("getOrders belief called");
 		List<Order> ret = new ArrayList<Order>();
-		Collection<PurchaseBook> goals = agent.getGoals(PurchaseBook.class);
-		for(PurchaseBook goal: goals)
+		Collection<PurchaseItem> goals = agent.getGoals(PurchaseItem.class);
+		for(PurchaseItem goal: goals)
 		{
 			ret.add(goal.getOrder());
 		}
@@ -182,8 +182,8 @@ public class BuyerBDI implements INegotiationAgent
 	/**
 	 * 
 	 */
-	@Plan(trigger=@Trigger(goals=PurchaseBook.class))
-	protected void purchaseBook(PurchaseBook goal)
+	@Plan(trigger=@Trigger(goals=PurchaseItem.class))
+	protected void purchaseItem(PurchaseItem goal)
 	{
 		int acceptable_price = 0;
 		Order order = goal.getOrder();
@@ -214,7 +214,7 @@ public class BuyerBDI implements INegotiationAgent
 		System.out.println("Buyer..." + acceptable_price);
 
 		// Find available seller agents.
-		IBuyBookService[]	services = agent.getServiceContainer().getRequiredServices("buyservice").get().toArray(new IBuyBookService[0]);
+		IBuyItemService[]	services = agent.getServiceContainer().getRequiredServices("buyservice").get().toArray(new IBuyItemService[0]);
 		if(services.length == 0)
 		{
             //System.out.println("No seller found, purchase failed.");
@@ -223,18 +223,18 @@ public class BuyerBDI implements INegotiationAgent
 		}
 
 		// Initiate a call-for-proposal.
-		Future<Collection<Tuple2<IBuyBookService, Integer>>>	cfp	= new Future<Collection<Tuple2<IBuyBookService, Integer>>>();
-		final CollectionResultListener<Tuple2<IBuyBookService, Integer>>	crl	= new CollectionResultListener<Tuple2<IBuyBookService, Integer>>(services.length, true,
-			new DelegationResultListener<Collection<Tuple2<IBuyBookService, Integer>>>(cfp));
+		Future<Collection<Tuple2<IBuyItemService, Integer>>>	cfp	= new Future<Collection<Tuple2<IBuyItemService, Integer>>>();
+		final CollectionResultListener<Tuple2<IBuyItemService, Integer>>	crl	= new CollectionResultListener<Tuple2<IBuyItemService, Integer>>(services.length, true,
+			new DelegationResultListener<Collection<Tuple2<IBuyItemService, Integer>>>(cfp));
 		System.out.println(services.length);
 		for(int i=0; i<services.length; i++)
 		{
-			final IBuyBookService	seller	= services[i];
-			seller.callForProposal(order.getTitle()).addResultListener(new IResultListener<Integer>()
+			final IBuyItemService	seller	= services[i];
+			seller.callForProposal(order.getName()).addResultListener(new IResultListener<Integer>()
 			{
 				public void resultAvailable(Integer result)
 				{
-					crl.resultAvailable(new Tuple2<IBuyBookService, Integer>(seller, result));
+					crl.resultAvailable(new Tuple2<IBuyItemService, Integer>(seller, result));
 					System.out.println("Seller..." +result);
 					offerHistory.add(new Offer(result,new Date(),currentRound));
 				}
@@ -247,10 +247,10 @@ public class BuyerBDI implements INegotiationAgent
 		}
 		// Sort results by price.
 		@SuppressWarnings("unchecked")
-		Tuple2<IBuyBookService, Integer>[]	proposals	= cfp.get().toArray(new Tuple2[0]);
-		Arrays.sort(proposals, new Comparator<Tuple2<IBuyBookService, Integer>>()
+		Tuple2<IBuyItemService, Integer>[]	proposals	= cfp.get().toArray(new Tuple2[0]);
+		Arrays.sort(proposals, new Comparator<Tuple2<IBuyItemService, Integer>>()
 		{
-			public int compare(Tuple2<IBuyBookService, Integer> o1, Tuple2<IBuyBookService, Integer> o2)
+			public int compare(Tuple2<IBuyItemService, Integer> o1, Tuple2<IBuyItemService, Integer> o2)
 			{
 				return o1.getSecondEntity().compareTo(o2.getSecondEntity());
 			}
@@ -259,7 +259,7 @@ public class BuyerBDI implements INegotiationAgent
 		// Do we have a winner?
 		if(proposals.length>0 && proposals[0].getSecondEntity().intValue()<=acceptable_price)
 		{
-			proposals[0].getFirstEntity().acceptProposal(order.getTitle(), proposals[0].getSecondEntity().intValue()).get();
+			proposals[0].getFirstEntity().acceptProposal(order.getName(), proposals[0].getSecondEntity().intValue()).get();
 			
 			generateNegotiationReport(order, proposals, acceptable_price);
 			
@@ -280,7 +280,7 @@ public class BuyerBDI implements INegotiationAgent
 	/**
 	*  Generate and add a negotiation report.
 	*/
-	protected void generateNegotiationReport(Order order, Tuple2<IBuyBookService, Integer>[] proposals, double acceptable_price)
+	protected void generateNegotiationReport(Order order, Tuple2<IBuyItemService, Integer>[] proposals, double acceptable_price)
 	{
 		String report = "Accepable price: "+acceptable_price+", proposals: ";
 		if(proposals!=null)
@@ -321,7 +321,7 @@ public class BuyerBDI implements INegotiationAgent
 		strategy_call = new StrategyCall();
 		currentRound = 0;
 		numberOfRounds = 15;
-		PurchaseBook goal = new PurchaseBook(order);
+		PurchaseItem goal = new PurchaseItem(order);
 		agent.dispatchTopLevelGoal(goal);
 	}
 	
@@ -331,7 +331,7 @@ public class BuyerBDI implements INegotiationAgent
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Collection<INegotiationGoal> getGoals()
 	{
-		return (Collection)agent.getGoals(PurchaseBook.class);
+		return (Collection)agent.getGoals(PurchaseItem.class);
 	}
 	
 	/**

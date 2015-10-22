@@ -2,8 +2,8 @@ package trading.common;
 
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
-import trading.buyer.BuyerBDI.PurchaseBook;
-import trading.seller.SellerBDI.SellBook;
+import trading.buyer.BuyerBDI.PurchaseItem;
+import trading.seller.SellerBDI.SellItem;
 import jadex.bdiv3.runtime.IBeliefListener;
 import jadex.bdiv3.runtime.IGoal;
 import jadex.bridge.IComponentStep;
@@ -99,7 +99,7 @@ public class GuiPanel extends JPanel
 			switch(column)
 			{
 				case 0:
-					return "Title";
+					return "Name";
 				case 1:
 					return "Start Price";
 				case 2:
@@ -130,7 +130,7 @@ public class GuiPanel extends JPanel
 			Order order = (Order)orders.get(row);
 			if(column == 0)
 			{
-				value = order.getTitle();
+				value = order.getName();
 			}
 			else if(column == 1)
 			{
@@ -180,13 +180,13 @@ public class GuiPanel extends JPanel
 		if(buy)
 		{
 			itemlabel = " Item to buy ";
-//			goalname = "purchase_book";
+//			goalname = "purchase_item";
 			addorderlabel = "Add new purchase order";
 		}
 		else
 		{
 			itemlabel = " Item to sell ";
-//			goalname = "sell_book";
+//			goalname = "sell_item";
 			addorderlabel = "Add new sell order";
 		}
 
@@ -362,12 +362,12 @@ public class GuiPanel extends JPanel
 								{
 									try
 									{
-										String title = dia.title.getText();
+										String name = dia.name.getText();
 										int limit = Integer.parseInt(dia.limit.getText());
 										int start = Integer.parseInt(dia.start.getText());
 										Date deadline = dformat.parse(dia.deadline.getText());
 										String strategy = dia.strategy.getSelectedItem().toString();
-										final Order order = new Order(title, deadline, start, limit, buy, cs,strategy);
+										final Order order = new Order(name, deadline, start, limit, buy, cs,strategy);
 										
 										agent.scheduleStep(new IComponentStep<Void>()
 										{
@@ -477,7 +477,7 @@ public class GuiPanel extends JPanel
 								if(row >= 0 && row < orders.size())
 								{
 									final Order order = (Order)orders.get(row);
-									edit_dialog.title.setText(order.getTitle());
+									edit_dialog.name.setText(order.getName());
 									edit_dialog.limit.setText(Integer.toString(order.getLimit()));
 									edit_dialog.start.setText(Integer.toString(order.getStartPrice()));
 									edit_dialog.deadline.setText(dformat.format(order.getDeadline()));
@@ -487,12 +487,12 @@ public class GuiPanel extends JPanel
 									{
 										try
 										{
-											String title = edit_dialog.title.getText();
+											String name = edit_dialog.name.getText();
 											int limit = Integer.parseInt(edit_dialog.limit.getText());
 											int start = Integer.parseInt(edit_dialog.start.getText());
 											Date deadline = dformat.parse(edit_dialog.deadline.getText());
 											String strategy = edit_dialog.strategy.getSelectedItem().toString();
-											order.setTitle(title);
+											order.setName(name);
 											order.setLimit(limit);
 											order.setStartPrice(start);
 											order.setDeadline(deadline);
@@ -645,7 +645,7 @@ public class GuiPanel extends JPanel
 	{
 		@SuppressWarnings("rawtypes")
 		private JComboBox orders = new JComboBox();
-		private JTextField title = new JTextField(20);
+		private JTextField name = new JTextField(20);
 		private JTextField limit = new JTextField(20);
 		private JTextField start = new JTextField(20);
 		private JTextField deadline = new JTextField(20);
@@ -716,11 +716,11 @@ public class GuiPanel extends JPanel
 							center.add(orders, rightcons);
 	
 							leftcons.gridy = rightcons.gridy = row++;
-							label = new JLabel("Title");
+							label = new JLabel("Name");
 							label.setMinimumSize(labeldim);
 							label.setPreferredSize(labeldim);
 							center.add(label, leftcons);
-							center.add(title, rightcons);
+							center.add(name, rightcons);
 	
 							leftcons.gridy = rightcons.gridy = row++;
 							label = new JLabel("Start price");
@@ -783,7 +783,7 @@ public class GuiPanel extends JPanel
 								public void actionPerformed(ActionEvent e)
 								{
 									Order order = (Order)orders.getSelectedItem();
-									title.setText(order.getTitle());
+									name.setText(order.getName());
 									limit.setText("" + order.getLimit());
 									start.setText("" + order.getStartPrice());
 									strategy.setSelectedItem(order.getNegotiationStrategy());

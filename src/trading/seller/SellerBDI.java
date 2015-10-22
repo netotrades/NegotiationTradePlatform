@@ -28,7 +28,7 @@ import jadex.micro.annotation.ProvidedService;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.RequiredService;
 import jadex.micro.annotation.RequiredServices;
-import trading.IBuyBookService;
+import trading.IBuyItemService;
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
 import trading.common.Gui;
@@ -48,10 +48,10 @@ import javax.swing.SwingUtilities;
 
 @Agent
 @Service
-@ProvidedServices(@ProvidedService(type=IBuyBookService.class))
+@ProvidedServices(@ProvidedService(type=IBuyItemService.class))
 @RequiredServices(@RequiredService(name="clockser", type=IClockService.class, binding=@Binding(scope=RequiredServiceInfo.SCOPE_PLATFORM)))
 @Arguments(@Argument(name="initial_orders", clazz=Order[].class))
-public class SellerBDI implements IBuyBookService, INegotiationAgent
+public class SellerBDI implements IBuyItemService, INegotiationAgent
 {
 	@Agent
 	protected BDIAgent agent;
@@ -114,15 +114,15 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	}
 	
 	@Goal(recur=true, recurdelay=10000, unique=true)
-	public class SellBook implements INegotiationGoal
+	public class SellItem implements INegotiationGoal
 	{
 		@GoalParameter
 		protected Order order;
 
 		/**
-		 *  Create a new SellBook. 
+		 *  Create a new SellItem. 
 		 */
-		public SellBook(Order order)
+		public SellItem(Order order)
 		{
 			this.order = order;
 		}
@@ -234,8 +234,8 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	public List<Order> getOrders()
 	{
 		List<Order> ret = new ArrayList<Order>();
-		Collection<SellBook> goals = agent.getGoals(SellBook.class);
-		for(SellBook goal: goals)
+		Collection<SellItem> goals = agent.getGoals(SellItem.class);
+		for(SellItem goal: goals)
 		{
 			ret.add(goal.getOrder());
 		}
@@ -245,13 +245,13 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	/**
 	 * 
 	 */
-	public List<Order> getOrders(String title)
+	public List<Order> getOrders(String name)
 	{
 		List<Order> ret = new ArrayList<Order>();
-		Collection<SellBook> goals = agent.getGoals(SellBook.class);
-		for(SellBook goal: goals)
+		Collection<SellItem> goals = agent.getGoals(SellItem.class);
+		for(SellItem goal: goals)
 		{
-			if(title==null || title.equals(goal.getOrder().getTitle()))
+			if(name==null || name.equals(goal.getOrder().getName()))
 			{
 				ret.add(goal.getOrder());
 			}
@@ -390,14 +390,14 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	}
 	
 	/**
-	 *  Ask the seller for a a quote on a book.
-	 *  @param title	The book title.
+	 *  Ask the seller for a a quote on a item.
+	 *  @param name	The item name.
 	 *  @return The price.
 	 */
-	public IFuture<Integer> callForProposal(String title)
+	public IFuture<Integer> callForProposal(String name)
 	{
 		final Future<Integer>	ret	= new Future<Integer>();
-		final MakeProposal goal = new MakeProposal(title);
+		final MakeProposal goal = new MakeProposal(name);
 		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>()
 		{
 			public void resultAvailable(Object result)
@@ -414,15 +414,15 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	}
 
 	/**
-	 *  Buy a book
-	 *  @param title	The book title.
+	 *  Buy an item
+	 *  @param name	The item name.
 	 *  @param price	The price to pay.
 	 *  @return A future indicating if the transaction was successful.
 	 */
-	public IFuture<Void> acceptProposal(String title, int price)
+	public IFuture<Void> acceptProposal(String name, int price)
 	{
 		final Future<Void>	ret	= new Future<Void>();
-		ExecuteTask goal = new ExecuteTask(title, price);
+		ExecuteTask goal = new ExecuteTask(name, price);
 		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>()
 		{
 			public void resultAvailable(Object result)
@@ -458,7 +458,7 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 		strategy_call = new StrategyCall();
 		currentRound = 0;
 		numberOfRounds = 15;
-		SellBook goal = new SellBook(order);
+		SellItem goal = new SellItem(order);
 		agent.dispatchTopLevelGoal(goal);
 	}
 	
@@ -468,7 +468,7 @@ public class SellerBDI implements IBuyBookService, INegotiationAgent
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Collection<INegotiationGoal> getGoals()
 	{
-		return (Collection)agent.getGoals(SellBook.class); 
+		return (Collection)agent.getGoals(SellItem.class); 
 	}
 	
 	/**
