@@ -268,7 +268,8 @@ public class GuiPanel extends JPanel
 		
 		add(BorderLayout.CENTER, splitter);
 		add(BorderLayout.SOUTH, south);
-
+		
+		//To refresh the item panel when updated/ edited
 		agent.scheduleStep(new IComponentStep<Void>()
 		{
 			@Classname("refresh")
@@ -300,7 +301,8 @@ public class GuiPanel extends JPanel
 				return IFuture.DONE;
 			}
 		});
-
+		 
+		//to refresh the  detail panel when the item panel is updated/ edited
 		agent.scheduleStep(new IComponentStep<Void>()
 		{
 			@Classname("refreshDetails")
@@ -341,8 +343,8 @@ public class GuiPanel extends JPanel
 			}
 		} );
 		
-		final InputDialog dia = new InputDialog(buy);
-		
+		//when the new order is added
+		final InputDialog dia = new InputDialog(buy);		
 		add.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -408,7 +410,7 @@ public class GuiPanel extends JPanel
 				});
 				
 			}
-		});
+		}); //end of the new order adding operation
 
 		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener()
@@ -422,6 +424,7 @@ public class GuiPanel extends JPanel
 			}
 		});
 
+		//when the order is removed
 		remove.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -454,8 +457,10 @@ public class GuiPanel extends JPanel
 					});
 				}
 			}
-		});
+		}); // end of the order remove operation
 
+		
+		//when the order is edited
 		final InputDialog edit_dialog = new InputDialog(buy);
 		edit.addActionListener(new ActionListener()
 		{
@@ -538,10 +543,16 @@ public class GuiPanel extends JPanel
 				});
 				
 			}
-		});
+		});// end of the order edit operation
+		 
+		//initial refresh to the item table
+		refresh(); 
 		
-		refresh();
-	}
+		//initial refresh to the order detail table
+		refreshDetails();
+		
+	}//end of constructor
+ 
 	
 	//-------- methods --------
 
@@ -584,11 +595,20 @@ public class GuiPanel extends JPanel
 	@SuppressWarnings("unused")
 	public void refreshDetails()
 	{
-		int sel = table.getSelectedRow();
-		if(sel!=-1)
-		{
+		// initialize the sel as the table selected row number
+		int sel = table.getSelectedRow(); 
+		
+		//if table row has not selected and orders are available in the list
+		if(sel == -1 && orders.size() > 0){ 
+			//set the first row as selected
+			sel = 0;
+		}
+		
+		//if the sel has zero or positive value
+		if( sel >= 0 )
+		{ 	
+			 
 			final Order order = (Order)orders.get(sel);
-			
 			agent.scheduleStep(new IComponentStep<Void>()
 			{
 				@Classname("refD")
@@ -598,6 +618,7 @@ public class GuiPanel extends JPanel
 					
 					final List<NegotiationReport> reps = ag.getReports(order);
 					
+					//sort the reports according to the time the order generated
 					Collections.sort(reps, new Comparator<NegotiationReport>()
 					{
 						public int compare(NegotiationReport o1, NegotiationReport o2)
@@ -606,6 +627,7 @@ public class GuiPanel extends JPanel
 						}
 					});
 					
+					// update the detail table
 					SwingUtilities.invokeLater(new Runnable()
 					{
 						public void run()
@@ -619,11 +641,48 @@ public class GuiPanel extends JPanel
 							}
 						}
 					});
+					
+					//return successfully done
 					return IFuture.DONE;
 				}
-			});
+			}); 
 		}
+	}	
+	 
+	/**
+	 *  write negotiation history to the excel file.
+	 */	
+	public void writeDetails()
+	{
+		agent.scheduleStep(new IComponentStep<Void>()
+				{
+					@Classname("ref")
+					public IFuture<Void> execute(IInternalAccess ia)
+					{
+						INegotiationAgent ag = (INegotiationAgent)((IPojoMicroAgent)ia).getPojoAgent();
+
+						final List<Order> aorders = ag.getOrders();
+						SwingUtilities.invokeLater(new Runnable()
+						{
+							@SuppressWarnings("unchecked")
+							public void run()
+							{
+								/*for(Order order: aorders)
+								{
+									if(!orders.contains(order))
+									{
+										orders.add(order);
+									}
+								}
+								items.fireTableDataChanged();*/
+							}
+						});
+						return IFuture.DONE;
+					}
+				});	 
 	}
+	
+	
 
 	/**
 	 *  Get the frame.
@@ -636,7 +695,7 @@ public class GuiPanel extends JPanel
 		return (Frame)parent;
 	}
 	
-	//-------- inner classes --------
+	//---------------- inner classes --------------------------
 
 	/**
 	 *  The input dialog.
