@@ -83,7 +83,9 @@ public class GuiPanel extends JPanel
 	private DefaultTableModel detailsdm; 
 	private AbstractTableModel items = new AbstractTableModel()
 	{
-
+		//initialize the total number of columns in the table
+		private final int numberOfColumns = 8;
+		
 		public int getRowCount()
 		{
 			return orders.size();
@@ -91,7 +93,7 @@ public class GuiPanel extends JPanel
 
 		public int getColumnCount()
 		{
-			return 8;
+			return this.numberOfColumns;
 		}
 
 		public String getColumnName(int column)
@@ -595,20 +597,20 @@ public class GuiPanel extends JPanel
 	@SuppressWarnings("unused")
 	public void refreshDetails()
 	{
-		// initialize the sel as the table selected row number
-		int sel = table.getSelectedRow(); 
+		// initialize the cell as the table selected row number
+		int cell = table.getSelectedRow(); 
 		
 		//if table row has not selected and orders are available in the list
-		if(sel == -1 && orders.size() > 0){ 
+		if(cell == -1 && orders.size() > 0){ 
 			//set the first row as selected
-			sel = 0;
+			cell = 0;
 		}
 		
-		//if the sel has zero or positive value
-		if( sel >= 0 )
+		//if the cell has zero or positive value
+		if( cell >= 0 )
 		{ 	
 			 
-			final Order order = (Order)orders.get(sel);
+			final Order order = (Order)orders.get(cell);
 			agent.scheduleStep(new IComponentStep<Void>()
 			{
 				@Classname("refD")

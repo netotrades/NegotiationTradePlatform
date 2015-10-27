@@ -189,23 +189,29 @@ public class BuyerBDI implements INegotiationAgent
 		Order order = goal.getOrder();
 		String neg_strategy = order.getNegotiationStrategy();
 
+		//Strategy 1- Strategy suggested by the available system - test strategy
 		if (neg_strategy.equals("strategy-1")) {
-			System.out.println("strategy - 1");
+			System.out.println("Buyer: strategy - 1");
 			double time_span = order.getDeadline().getTime() - order.getStartTime();
 			double elapsed_time = getTime() - order.getStartTime();
 			double price_span = order.getLimit() - order.getStartPrice();
 			acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();
 		}
-
+		
+		//test strategy 2
 		else if (neg_strategy.equals("strategy-2")) {
-			System.out.println("strategy - 2");
+			System.out.println("Buyer: strategy - 2");
 			acceptable_price = historyPrice;
 			historyPrice = acceptable_price + 3;
 		}
 		
+		//Strategy 3- Main strategy
 		else if (neg_strategy.equals("strategy-3")) {
-			System.out.println("strategy - 3");
-			if (currentRound == 0) acceptable_price = order.getStartPrice();
+			System.out.println("Buyer: Strategy - 3");
+			if (currentRound == 0) 
+			{
+				acceptable_price = order.getStartPrice();
+			}
 			else if(currentRound < numberOfRounds) 
 				strategy_call.callForStrategy(order.getLimit(),order.getDeadline(),offerHistory, numberOfRounds);
 			currentRound++;
@@ -317,10 +323,11 @@ public class BuyerBDI implements INegotiationAgent
 	{
 		System.out.println("create Goal");
 		historyPrice = order.getStartPrice();
+		
 		offerHistory = new ArrayList<Offer>();
 		strategy_call = new StrategyCall();
 		currentRound = 0;
-		numberOfRounds = 15;
+	    numberOfRounds = 15;
 		PurchaseItem goal = new PurchaseItem(order);
 		agent.dispatchTopLevelGoal(goal);
 	}

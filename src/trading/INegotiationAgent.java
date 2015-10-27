@@ -19,7 +19,7 @@ public interface INegotiationAgent
 	public BDIAgent getAgent();
 	
 	/**
-	 *  Create a purchase or sell oder.
+	 *  Create a purchase or sell order.
 	 */
 	public void createGoal(Order order);
 	
