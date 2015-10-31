@@ -1,6 +1,7 @@
 package trading;
  
 
+import trading.common.Order;
 import jadex.commons.future.IFuture;
 
 /**
@@ -28,7 +29,7 @@ public interface IBuyItemService
 	 * @param name
 	 * @param price
 	 */
-	public void setacceptablePrice(String name, int price);
+	public void setacceptablePrice(Order order, String name, int price);
 	
 	
 	
