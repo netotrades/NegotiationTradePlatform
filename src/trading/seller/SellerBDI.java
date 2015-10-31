@@ -48,181 +48,165 @@ import javax.swing.SwingUtilities;
 
 @Agent
 @Service
-@ProvidedServices(@ProvidedService(type=IBuyItemService.class))
-@RequiredServices(@RequiredService(name="clockser", type=IClockService.class, binding=@Binding(scope=RequiredServiceInfo.SCOPE_PLATFORM)))
-@Arguments(@Argument(name="initial_orders", clazz=Order[].class))
-public class SellerBDI implements IBuyItemService, INegotiationAgent
-{
+@ProvidedServices(@ProvidedService(type = IBuyItemService.class))
+@RequiredServices(@RequiredService(name = "clockser", type = IClockService.class, binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM) ))
+@Arguments(@Argument(name = "initial_orders", clazz = Order[].class))
+public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	@Agent
 	protected BDIAgent agent;
-	
+
 	@Belief
 	protected List<NegotiationReport> reports = new ArrayList<NegotiationReport>();
-	
+
 	private ArrayList<Offer> offerHistory;
 
 	protected Gui gui;
-	
+
 	private int historyPrice;
-	
+
 	private int currentRound;
-	
+
 	private int numberOfRounds;
-	
+
 	private StrategyCall strategy_call;
-	
+
+	private Order order;
+
 	/**
-	 *  The agent body.
+	 * The agent body.
 	 */
 	@AgentBody
-	public void body()
-	{
-		Order[] ios = (Order[])agent.getArgument("initial_orders");
-		if(ios!=null)
-		{
-			for(Order o: ios)
-			{
+	public void body() {
+		Order[] ios = (Order[]) agent.getArgument("initial_orders");
+		if (ios != null) {
+			for (Order o : ios) {
 				createGoal(o);
 			}
 		}
-		
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
 					gui = new Gui(agent.getExternalAccess());
+				} catch (ComponentTerminatedException cte) {
 				}
-				catch(ComponentTerminatedException cte)
-				{
- 				}
 			}
 		});
 	}
-	
+
 	/**
-	 *  Called when agent terminates.
+	 * Called when agent terminates.
 	 */
 	@AgentKilled
-	public void shutdown()
-	{
-		if(gui!=null)
-		{
+	public void shutdown() {
+		if (gui != null) {
 			gui.dispose();
 		}
 	}
-	
-	@Goal(recur=true, recurdelay=10000, unique=true)
-	public class SellItem implements INegotiationGoal
-	{
+
+	@Goal(recur = true, recurdelay = 10000, unique = true)
+	public class SellItem implements INegotiationGoal {
 		@GoalParameter
 		protected Order order;
 
 		/**
-		 *  Create a new SellItem. 
+		 * Create a new SellItem.
 		 */
-		public SellItem(Order order)
-		{
+		public SellItem(Order order) {
 			this.order = order;
 		}
 
 		/**
-		 *  Get the order.
-		 *  @return The order.
+		 * Get the order.
+		 * 
+		 * @return The order.
 		 */
-		public Order getOrder()
-		{
+		public Order getOrder() {
 			return order;
 		}
-		
-		@GoalDropCondition(parameters="order")
-		public boolean checkDrop()
-		{
+
+		@GoalDropCondition(parameters = "order")
+		public boolean checkDrop() {
 			return order.getState().equals(Order.FAILED);
 		}
-		
-		@GoalTargetCondition(parameters="order")
-		public boolean checkTarget()
-		{
+
+		@GoalTargetCondition(parameters = "order")
+		public boolean checkTarget() {
 			return Order.DONE.equals(order.getState());
 		}
 	}
-	
+
 	@Goal
-	public class MakeProposal
-	{
+	public class MakeProposal {
 		protected String cfp;
 		protected int proposal;
-		
+
 		/**
-		 *  Create a new MakeProposal. 
+		 * Create a new MakeProposal.
 		 */
-		public MakeProposal(String cfp)
-		{
+		public MakeProposal(String cfp) {
 			this.cfp = cfp;
 		}
 
 		/**
-		 *  Get the cfp.
-		 *  @return The cfp.
+		 * Get the cfp.
+		 * 
+		 * @return The cfp.
 		 */
-		public String getCfp()
-		{
+		public String getCfp() {
 			return cfp;
 		}
 
 		/**
-		 *  Get the proposal.
-		 *  @return The proposal.
+		 * Get the proposal.
+		 * 
+		 * @return The proposal.
 		 */
-		public int getProposal()
-		{
+		public int getProposal() {
 			return proposal;
 		}
 
 		/**
-		 *  Set the proposal.
-		 *  @param proposal The proposal to set.
+		 * Set the proposal.
+		 * 
+		 * @param proposal
+		 *            The proposal to set.
 		 */
-		public void setProposal(int proposal)
-		{
+		public void setProposal(int proposal) {
 			this.proposal = proposal;
 		}
-		
+
 	}
-	
+
 	@Goal
-	public class ExecuteTask
-	{
+	public class ExecuteTask {
 		protected String cfp;
 		protected int proposal;
-		
+
 		/**
-		 *  Create a new ExecuteTask. 
+		 * Create a new ExecuteTask.
 		 */
-		public ExecuteTask(String cfp, int proposal)
-		{
+		public ExecuteTask(String cfp, int proposal) {
 			super();
 			this.cfp = cfp;
 			this.proposal = proposal;
 		}
 
 		/**
-		 *  Get the cfp.
-		 *  @return The cfp.
+		 * Get the cfp.
+		 * 
+		 * @return The cfp.
 		 */
-		public String getCfp()
-		{
+		public String getCfp() {
 			return cfp;
 		}
 
 		/**
-		 *  Get the proposal.
-		 *  @return The proposal.
+		 * Get the proposal.
+		 * 
+		 * @return The proposal.
 		 */
-		public int getProposal()
-		{
+		public int getProposal() {
 			return proposal;
 		}
 	}
@@ -230,57 +214,49 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 	/**
 	 * 
 	 */
-	@Belief(rawevents={@RawEvent(ChangeEvent.GOALADOPTED), @RawEvent(ChangeEvent.GOALDROPPED)})
-	public List<Order> getOrders()
-	{
+	@Belief(rawevents = { @RawEvent(ChangeEvent.GOALADOPTED), @RawEvent(ChangeEvent.GOALDROPPED) })
+	public List<Order> getOrders() {
 		List<Order> ret = new ArrayList<Order>();
 		Collection<SellItem> goals = agent.getGoals(SellItem.class);
-		for(SellItem goal: goals)
-		{
+		for (SellItem goal : goals) {
 			ret.add(goal.getOrder());
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * 
 	 */
-	public List<Order> getOrders(String name)
-	{
+	public List<Order> getOrders(String name) {
 		List<Order> ret = new ArrayList<Order>();
 		Collection<SellItem> goals = agent.getGoals(SellItem.class);
-		for(SellItem goal: goals)
-		{
-			if(name==null || name.equals(goal.getOrder().getName()))
-			{
+		for (SellItem goal : goals) {
+			if (name == null || name.equals(goal.getOrder().getName())) {
 				ret.add(goal.getOrder());
 			}
 		}
 		return ret;
 	}
-	
-	@Plan(trigger=@Trigger(goals=MakeProposal.class))
-	protected void makeProposal(MakeProposal goal)
-	{
+
+	@Plan(trigger = @Trigger(goals = MakeProposal.class) )
+	protected void makeProposal(MakeProposal goal) {
 		final long time = getTime();
 		List<Order> orders = getOrders(goal.getCfp());
-		
-		if(orders.isEmpty())
+
+		if (orders.isEmpty())
 			throw new PlanFailureException();
-			
-		Collections.sort(orders, new Comparator<Order>()
-		{
-			public int compare(Order o1, Order o2)
-			{
-				double prio1 = (time-o1.getStartTime()) / (o1.getDeadline().getTime()-o1.getStartTime());
-				double prio2 = (time-o1.getStartTime()) / (o1.getDeadline().getTime()-o1.getStartTime());
-				return prio1>prio2? 1: prio1<prio2? -1: o1.hashCode()-o2.hashCode();
+
+		Collections.sort(orders, new Comparator<Order>() {
+			public int compare(Order o1, Order o2) {
+				double prio1 = (time - o1.getStartTime()) / (o1.getDeadline().getTime() - o1.getStartTime());
+				double prio2 = (time - o1.getStartTime()) / (o1.getDeadline().getTime() - o1.getStartTime());
+				return prio1 > prio2 ? 1 : prio1 < prio2 ? -1 : o1.hashCode() - o2.hashCode();
 			}
 		});
-		Order order = orders.get(0);
+		order = orders.get(0);
 		String neg_strategy = order.getNegotiationStrategy();
 		int acceptable_price = 0;
-		
+
 		// Use most urgent order for preparing proposal.
 
 		if (order != null) {
@@ -295,54 +271,47 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 				acceptable_price = historyPrice;
 				historyPrice = acceptable_price - 2;
 			}
-			
-			else if (neg_strategy.equals("strategy-3")) {
-				acceptable_price = historyPrice;
-				historyPrice = acceptable_price - 2;
-			}
-			
+
 			else if (neg_strategy.equals("strategy-3")) {
 				System.out.println("strategy - 3");
-				if (currentRound == 0) acceptable_price = order.getStartPrice();
-				else if(currentRound < numberOfRounds) 
-					strategy_call.callForStrategy(order.getLimit(),order.getDeadline(),offerHistory, numberOfRounds);
+				if (currentRound == 0)
+					acceptable_price = order.getStartPrice();
+				else if (currentRound < numberOfRounds)
+					strategy_call.callForStrategy(order.getLimit(), order.getDeadline(), offerHistory, numberOfRounds);
 				currentRound++;
 			}
 
-			agent.getLogger().info(agent.getAgentName()+" proposed: " + acceptable_price);
-			
+			agent.getLogger().info(agent.getAgentName() + " proposed: " + acceptable_price);
+
 			// Store proposal data in plan parameters.
 			goal.setProposal(acceptable_price);
-			
-			String report = "Made proposal: "+acceptable_price;
+
+			String report = "Made proposal: " + acceptable_price;
 			NegotiationReport nr = new NegotiationReport(order, report, getTime());
 			reports.add(nr);
 		}
 	}
-	
-	@Plan(trigger=@Trigger(goals=ExecuteTask.class))
-	protected void executeTask(ExecuteTask goal)
-	{
+
+	@Plan(trigger = @Trigger(goals = ExecuteTask.class) )
+	protected void executeTask(ExecuteTask goal) {
 		// Search suitable open orders.
 		final long time = getTime();
 		List<Order> orders = getOrders(goal.getCfp());
-		
-		if(orders.isEmpty())
+
+		if (orders.isEmpty())
 			throw new PlanFailureException();
-			
-		Collections.sort(orders, new Comparator<Order>()
-		{
-			public int compare(Order o1, Order o2)
-			{
-				double prio1 = (time-o1.getStartTime()) / (o1.getDeadline().getTime()-o1.getStartTime());
-				double prio2 = (time-o1.getStartTime()) / (o1.getDeadline().getTime()-o1.getStartTime());
-				return prio1>prio2? 1: prio1<prio2? -1: o1.hashCode()-o2.hashCode();
+
+		Collections.sort(orders, new Comparator<Order>() {
+			public int compare(Order o1, Order o2) {
+				double prio1 = (time - o1.getStartTime()) / (o1.getDeadline().getTime() - o1.getStartTime());
+				double prio2 = (time - o1.getStartTime()) / (o1.getDeadline().getTime() - o1.getStartTime());
+				return prio1 > prio2 ? 1 : prio1 < prio2 ? -1 : o1.hashCode() - o2.hashCode();
 			}
 		});
 		Order order = orders.get(0);
 		String neg_strategy = order.getNegotiationStrategy();
 		int acceptable_price = 0;
-		
+
 		// Use most urgent order for preparing proposal.
 
 		if (order != null) {
@@ -357,13 +326,13 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 				acceptable_price = historyPrice;
 				historyPrice = acceptable_price - 2;
 			}
-			
+
 			System.out.println(acceptable_price);
-		
+
 			// Extract order data.
 			int price = goal.getProposal();
 			System.out.println(price);
-			
+
 			if (price >= acceptable_price) {
 				order.setState(Order.DONE);
 				order.setExecutionPrice(price);
@@ -372,41 +341,36 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 				String report = "Sold for: " + price;
 				NegotiationReport nr = new NegotiationReport(order, report, getTime());
 				reports.add(nr);
-			}
-			else
-			{    
+			} else {
 				throw new PlanFailureException();
 			}
 		}
 	}
-	
+
 	/**
-	 *  Get the current time.
+	 * Get the current time.
 	 */
-	protected long getTime()
-	{
-		IClockService cs = (IClockService)agent.getServiceContainer().getRequiredService("clockser").get();
+	protected long getTime() {
+		IClockService cs = (IClockService) agent.getServiceContainer().getRequiredService("clockser").get();
 		return cs.getTime();
 	}
-	
+
 	/**
-	 *  Ask the seller for a a quote on a item.
-	 *  @param name	The item name.
-	 *  @return The price.
+	 * Ask the seller for a a quote on a item.
+	 * 
+	 * @param name
+	 *            The item name.
+	 * @return The price.
 	 */
-	public IFuture<Integer> callForProposal(String name)
-	{
-		final Future<Integer>	ret	= new Future<Integer>();
+	public IFuture<Integer> callForProposal(String name) {
+		final Future<Integer> ret = new Future<Integer>();
 		final MakeProposal goal = new MakeProposal(name);
-		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>()
-		{
-			public void resultAvailable(Object result)
-			{
+		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>() {
+			public void resultAvailable(Object result) {
 				ret.setResult(Integer.valueOf(goal.getProposal()));
 			}
-			
-			public void exceptionOccurred(Exception exception)
-			{
+
+			public void exceptionOccurred(Exception exception) {
 				ret.setException(exception);
 			}
 		});
@@ -414,44 +378,57 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 	}
 
 	/**
-	 *  Buy an item
-	 *  @param name	The item name.
-	 *  @param price	The price to pay.
-	 *  @return A future indicating if the transaction was successful.
+	 * Buy an item
+	 * 
+	 * @param name
+	 *            The item name.
+	 * @param price
+	 *            The price to pay.
+	 * @return A future indicating if the transaction was successful.
 	 */
-	public IFuture<Void> acceptProposal(String name, int price)
-	{
-		final Future<Void>	ret	= new Future<Void>();
+	public IFuture<Void> acceptProposal(String name, int price) {
+		final Future<Void> ret = new Future<Void>();
 		ExecuteTask goal = new ExecuteTask(name, price);
-		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>()
-		{
-			public void resultAvailable(Object result)
-			{
+		agent.dispatchTopLevelGoal(goal).addResultListener(new IResultListener<Object>() {
+			public void resultAvailable(Object result) {
 				ret.setResult(null);
 			}
-			
-			public void exceptionOccurred(Exception exception)
-			{
+
+			public void exceptionOccurred(Exception exception) {
 				ret.setException(exception);
 			}
 		});
 		return ret;
 	}
-	
+
 	/**
-	 *  Get the agent.
-	 *  @return The agent.
+	 * Set seller's offer history
+	 * 
+	 * @param name
+	 * @param price
 	 */
-	public BDIAgent getAgent()
-	{
+	public void setacceptablePrice(String name, int price) {
+		if (order.getName().equals(name)) {
+			offerHistory.add(new Offer(price, new Date(), currentRound));
+		}
+		for (int i = 0; i < offerHistory.size(); i++) {
+			System.out.println("Offer from buyer" + offerHistory.get(i).getOfferPrice());
+		}
+	}
+
+	/**
+	 * Get the agent.
+	 * 
+	 * @return The agent.
+	 */
+	public BDIAgent getAgent() {
 		return agent;
 	}
-	
+
 	/**
-	 *  Create a purchase or sell oder.
+	 * Create a purchase or sell oder.
 	 */
-	public void createGoal(Order order)
-	{
+	public void createGoal(Order order) {
 		System.out.println("create Goal");
 		historyPrice = order.getStartPrice();
 		offerHistory = new ArrayList<Offer>();
@@ -461,26 +438,22 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent
 		SellItem goal = new SellItem(order);
 		agent.dispatchTopLevelGoal(goal);
 	}
-	
+
 	/**
-	 *  Get all purchase or sell goals.
+	 * Get all purchase or sell goals.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Collection<INegotiationGoal> getGoals()
-	{
-		return (Collection)agent.getGoals(SellItem.class); 
+	public Collection<INegotiationGoal> getGoals() {
+		return (Collection) agent.getGoals(SellItem.class);
 	}
-	
+
 	/**
-	 *  Get all reports.
+	 * Get all reports.
 	 */
-	public List<NegotiationReport> getReports(Order order)
-	{
+	public List<NegotiationReport> getReports(Order order) {
 		List<NegotiationReport> ret = new ArrayList<NegotiationReport>();
-		for(NegotiationReport rep: reports)
-		{
-			if(rep.getOrder().equals(order))
-			{
+		for (NegotiationReport rep : reports) {
+			if (rep.getOrder().equals(order)) {
 				ret.add(rep);
 			}
 		}

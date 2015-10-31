@@ -23,6 +23,15 @@ public interface IBuyItemService
 	 */
 	public IFuture<Void> acceptProposal(String name, int price);
 	
+	/**
+	 * Set seller's offer history
+	 * @param name
+	 * @param price
+	 */
+	public void setacceptablePrice(String name, int price);
+	
+	
+	
 //	/**
 //	 *  Refuse to buy an item
 //	 *  @param name	The item name.
