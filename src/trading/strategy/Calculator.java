@@ -3,128 +3,454 @@ package trading.strategy;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ *  All the possible calculations are done in this calculator class. 
+ */
 public class Calculator {
-
+	
+	/**
+	 *  Calculate average of the offers in the array list.
+	 *  @param offers: array list of offers. 
+	 *   @return avg: average offer prices value of the given offer list.
+	 */
 	public double FindAverage(ArrayList<Offer> offers) {
-		double sum = 0;
-		double avg = 0;
+		
+		//initialize the parameters
+		double sum = 0.0;
+		double avg = 0.0;
+		
+		//if the denominator is a non zero value
+		if(offers.size()> 0){
+			
+			for (int i = 0; i < offers.size(); i++) { //start of the for loop
+				
+				sum += offers.get(i).getOfferPrice(); 
+				
+			}// end of the for loop
+			
+			avg = ((sum * 1.0) / offers.size());
+		}		
 
-		for (int i = 0; i < offers.size(); i++) {
-			sum += offers.get(i).getOfferPrice();
-		}
-
-		avg = sum / offers.size();
-
+		//return average value of the given offer list
 		return avg;
 	}
 
-	public double GenerateFittedOffer(DetectionRegion detReg, int i, int j, ArrayList<Offer> offerHistory,
-			Offer newOffer, int numberOfRounds) {
+	/**
+	 *  Generate fitted offer for a given cell.
+	 *  @param detReg: array list of offers. 
+	 *  @param row: row number of the cell.
+	 *  @param col: column number of the cell.
+	 *  @param offerHistory: offerHistory of the opponent.
+	 *  @return fittedOffer: return fitted offer for the given cell. 
+	 */
+	public double GenerateFittedOffer(DetectionRegion detReg, int row, int col, ArrayList<Offer> offerHistory) {
+		
+		//initialize the fitted offer
+		double fittedOffer = 0.0;
+		
+		//initialize parameters
+		double p0 = 0 ; double pix = 0 ;
+		long t = 0; long tix =0;
+		
+		if(offerHistory.size() > 0){
+			
+			p0 = offerHistory.get(0).getOfferPrice();
+			pix = detReg.getCells()[row][col].getCellReservePrice();
+			tix = detReg.getCells()[row][col].getCellDeadline().getTime();
+			
+			// calculate the value 'b' 
+			double b = this.GenerateBValue(detReg, row, col, offerHistory);
+			
+			System.out.println("\np0 = " + p0);
+			System.out.println("pix = " + pix);
+			System.out.println("tix = " + tix);
+			System.out.println("b = " + b);	
+			
+			if(offerHistory.size()== 1){
+				fittedOffer = p0;
+			}
+			//value b and fitted offer is calculated 2nd step onwards
+			else{			
+				
+				t = offerHistory.get(offerHistory.size()-1).getOfferTime().getTime();				
 
-		float b = GenerateBValue(detReg, i, j, offerHistory, newOffer, numberOfRounds);
-
-		double offer = (double) (offerHistory.get(0).getOfferPrice()
-				+ (detReg.getCells()[i][j].getCellReservePrice() - offerHistory.get(0).getOfferPrice()) * Math.pow(
-						(newOffer.getOfferTime().getTime() / detReg.getCells()[i][j].getCellDeadline().getTime()), b));
-		return offer;
+				System.out.println("t = " + t);			
+				
+				//calculate the fitted offer 
+				if( tix != 0 && tix != Double.POSITIVE_INFINITY && tix != Double.NEGATIVE_INFINITY){
+					fittedOffer = (double)(p0 + ((pix - p0)* (Math.pow((t * 1.0 / tix) , b))));
+				}
+				else{
+					fittedOffer = p0;
+				}					
+			}//end of else
+		}//end of if clause		
+			
+		//return calculated fitted offer 
+		return fittedOffer;
+	}
+	
+	/**
+	 *  Generate beta or "b" value for the given cell.
+	 *  @param detReg: array list of offers. 
+	 *  @param row: row number of the cell.
+	 *  @param col: column number of the cell.
+	 *  @param offerHistory: offerHistory of the opponent.
+	 *  @return b: return value b. 
+	 */
+	private double GenerateBValue(DetectionRegion detReg, int row, int col, ArrayList<Offer> offerHistory) { 
+		
+		//initialize the parameters
+		double tpSum = 0; double t2Sum = 1.0; double b = 0;
+		double p0 = 0; double pi = 0; double pix = 0;
+		double piStar = 1; double tiStar = 1;
+		long ti = 0; long tix = 0;
+		
+		//sometimes b is needed when there is one offer or no offer
+		if( offerHistory.size()== 0 || offerHistory.size() == 1 ){
+			b = 1;
+		}		//b value cannot be calculated if there are no more than or equal to 2 elements in the history
+		else{ 
+			
+			for (int k = 1; k < offerHistory.size(); k++) {//for loop start
+				
+				p0 = offerHistory.get(0).getOfferPrice();
+				pi = offerHistory.get(k).getOfferPrice();
+				pix = detReg.getCells()[row][col].getCellReservePrice();
+				
+				//calculate pi star value
+				if((p0 - pix)!= 0 && (p0 - pix) != Double.POSITIVE_INFINITY && (p0 - pix) != Double.NEGATIVE_INFINITY){
+					if((p0 - pi)!= 0 && (p0 - pi) != Double.POSITIVE_INFINITY && (p0 - pi) != Double.NEGATIVE_INFINITY){
+						piStar = (double)Math.log(Math.abs((p0 - pi)* 1.0 /(p0 - pix)));
+						System.out.println("pistar calculated using the formula.......");
+					}else{
+						piStar = 1.0;
+					}				
+				}
+				else{
+					piStar = 1.0;
+				}
+				
+				System.out.println("method for loop");
+				System.out.println("k = "+ k);
+				System.out.println("p0 = "+ p0);
+				System.out.println("pi = "+ pi);
+				System.out.println("pix = "+ pix);
+				System.out.println("pistar = "+ piStar); 
+				
+				ti = offerHistory.get(k).getOfferTime().getTime();
+				tix = detReg.getCells()[row][col].getCellDeadline().getTime();
+				
+				System.out.println("ti = "+ ti);
+				System.out.println("tix = "+ tix); 
+				System.out.println("ti / tix = "+ (ti * 1.0 / tix));
+				
+				//calculate tStar value
+				if( ti!=0 && tix != 0 && tix!= Double.POSITIVE_INFINITY && tix!= Double.NEGATIVE_INFINITY){
+					if(ti!=0 && tix != 0 && tix!= Double.POSITIVE_INFINITY && tix!= Double.NEGATIVE_INFINITY){
+						tiStar = (double) Math.log(Math.abs(ti * 1.0 / tix));
+						System.out.println("tistar calculated using the formula............");
+					}else{
+						tiStar = 1.0;
+					}					
+				}else{
+					tiStar = 1.0;
+				}
+				
+				System.out.println("tistar = "+ tiStar );
+				
+				//cumulative sum for the numerator of b calculation 
+					tpSum += (double) tiStar * piStar;					
+				
+				System.out.println("tpsum = "+ tpSum );
+				
+				//cumulative sum for the denominator of b calculation
+				if(tiStar!=0 && tiStar!= Double.POSITIVE_INFINITY && tiStar!= Double.NEGATIVE_INFINITY){
+					t2Sum += Math.pow(tiStar, 2);
+				}else{
+					t2Sum = 1;
+				}
+				
+				System.out.println("t2Sum = "+ t2Sum );
+				
+			}//end of the for loop 
+			
+			System.out.println("Final tpSum ="+ tpSum);
+			System.out.println("Final t2Sum ="+ t2Sum);
+			
+			//if the denominator is non zero calculate the b value
+			if ( t2Sum != 0 && t2Sum != Double.POSITIVE_INFINITY && t2Sum != Double.NEGATIVE_INFINITY ){				
+				if ( tpSum != 0 && tpSum != Double.POSITIVE_INFINITY && tpSum != Double.NEGATIVE_INFINITY ){
+					
+					System.out.println("(tpSum * 1.0 / t2Sum)"+(tpSum * 1.0 / t2Sum));
+					
+					b = (double)(tpSum * 1.0 / t2Sum);
+				}else{
+					b= 1;
+				}  
+			}else{
+				b = 1;
+			}
+			
+			
+			if(b== Double.POSITIVE_INFINITY||b== Double.NEGATIVE_INFINITY){
+				b = 1.0;
+			}
+			
+			System.out.println("b = "+ b);
+			
+		}// end of the if clause
+		 
+		return b; //return value of b
 	}
 
-	public double GenerateFittedOfferForGivenTime(DetectionRegion detReg, int i, int j, ArrayList<Offer> offerHistory,
-			Offer newOffer, int numberOfRounds, Date time) {
+	/**
+	 *  Generate gamma value for the given cell: 
+	 *  To check the non-linear correlation between historical offers and the fitted offers. 
+	 */
+	public double generateGammaValue(ArrayList<Offer> offerHistory, double avgHistory, double avgFitted, int row,
+			int col, DetectionRegion detReg,  int numberOfRows, int numberOfColumns) {
 
-		float b = GenerateBValue(detReg, i, j, offerHistory, newOffer, numberOfRounds);
+		//initialize the parameters
+		double sumUP = 0.0;	double sumDown1 = 0.0; 	double sumDown2 = 0.0;	double foundGamma = 1.0;
+		double pi = 0.0; double piHat=0.0;  
+		
+		//cell should have fitted offers corresponds to each histori
+		if(detReg.getCells()[row][col].getFittedOffers().size() == offerHistory.size()){ 
+			
+			//gamma can only calculate if the offer size is greater than 1
+			if(offerHistory.size()>1){
+				
+				for (int round = 1; round < (offerHistory.size()); round++) {//for loop start
 
-		double offer = (double) (offerHistory.get(0).getOfferPrice()
-				+ (detReg.getCells()[i][j].getCellReservePrice() - offerHistory.get(0).getOfferPrice())
-						* Math.pow(time.getTime() / detReg.getCells()[i][j].getCellDeadline().getTime(), b));
-		return offer;
-	}
-
-	public double generateGammaValue(Offer newOffer, double avgHistory, int numberOfRounds, double avgFitted, int i,
-			int j, DetectionRegion detReg) {
-
-		double sumUP = 0.0;
-		double sumDown1 = 0.0;
-		double sumDown2 = 0.0;
-
-		for (int round = 1; round <= numberOfRounds; round++) {
-
-			sumUP += (newOffer.getOfferPrice() - avgHistory)
-					* (detReg.getCells()[i][j].getCellReservePrice() - avgFitted);
-			sumDown1 += Math.pow((newOffer.getOfferPrice() - avgHistory), 2);
-			sumDown2 += Math.pow(detReg.getCells()[i][j].getCellReservePrice() - avgFitted, 2);
-		}
-
-		double foundGamma = sumUP / Math.sqrt(sumDown1 * sumDown2);
+					pi = offerHistory.get(round).getOfferPrice();
+					piHat = detReg.getCells()[row][col].getFittedOffers().get(round).getOfferPrice();
+					
+	/*				System.out.println(" pi ="+ pi);
+					System.out.println("piHat ="+ piHat);
+					System.out.println(" avgHistory ="+ avgHistory);
+					System.out.println("avgFitted ="+ avgFitted);*/
+					
+					//get production of (offer and average offer history difference) and (fitted offer and average fitted offer history difference)
+					sumUP += ((pi - avgHistory)	* (piHat - avgFitted));
+					System.out.println("sumUP ="+ sumUP);
+					
+					//sum of square of  (offer and average offer history difference)
+					sumDown1 += Math.pow(Math.abs(pi - avgHistory), 2);
+					System.out.println("sumDown1 ="+ sumDown1);
+					
+					//sum of square of (fitted offer and average fitted offer history difference)
+					sumDown2 += Math.pow(Math.abs(piHat - avgFitted), 2);
+					System.out.println("sumDown2 ="+ sumDown2);
+					
+				}//end of the for loop
+				
+				//calculate gamma value
+				if(Math.sqrt(Math.abs(sumDown1 * sumDown2))> 0){
+					foundGamma = (double)(sumUP * 1.0 / Math.sqrt(Math.abs(sumDown1 * sumDown2)));
+				}
+				else{
+					foundGamma = 1.0;
+				}
+				
+			}//end of else if clause
+			
+		} 
+		
+		System.out.println("foundGamma ="+ foundGamma);
+		
+		// return calculated gamma value
 		return foundGamma;
 	}
+	
+	/**
+	 *  Calculate fitted offer for the given time. 
+	 *  @param detReg: array list of offers. 
+	 *  @param row: row number of the cell.
+	 *  @param col: column number of the cell.
+	 *  @param offerHistory: offerHistory of the opponent.
+	 *  @param numberOfRounds: total number of rounds.
+	 *  @param time: given time.
+	 *  @return fittedOffer: return fitted offer. 
+	 */
+	public double GenerateFittedOfferForGivenTime(DetectionRegion detReg, int i, int j, ArrayList<Offer> offerHistory,
+			int numberOfRounds, Date time) {
+		
+		System.out.println("This is the generate fitted offer for the given time method of the cell= "+i+","+j);
+		
+		//calculate the b value : here b is referred to as the 'betaIHat' value
+		double betaIHat = GenerateBValue(detReg, i, j, offerHistory);
 
-	public Date GeneratedTimeForGivenFittedOffer(DetectionRegion detReg, int i, int j, ArrayList<Offer> offerHistory,
-			Offer newOffer, int numberOfRounds, double offerPrice) {
-
-		float b = GenerateBValue(detReg, i, j, offerHistory, newOffer, numberOfRounds);
-
-		Date resultTime = new Date((long) (Math
-				.pow(((offerPrice - offerHistory.get(0).getOfferPrice())
-						/ (detReg.getCells()[i][j].getCellReservePrice() - offerHistory.get(0).getOfferPrice())), 1 / 6)
-				* (detReg.getCells()[i][j].getCellDeadline().getTime())));
-		return resultTime;
-	}
-
-	private float GenerateBValue(DetectionRegion detReg, int i, int j, ArrayList<Offer> offerHistory, Offer newOffer,
-			int numberOfRounds) {
-		float tpSum = 0;
-		float t2Sum = 1;
-
-		for (int k = 0; k < numberOfRounds; k++) {
-
-			float tStar = (float) Math
-					.log(newOffer.getOfferTime().getTime() / detReg.getCells()[i][j].getCellDeadline().getTime());
-			float pStar = (float) Math.log((offerHistory.get(0).getOfferPrice() - newOffer.getOfferPrice())
-					/ (offerHistory.get(0).getOfferPrice() - detReg.getCells()[i][j].getCellReservePrice()));
-
-			tpSum += tStar * pStar;
-			t2Sum += Math.pow(tStar, 2);
+		System.out.println("beta i hat = "+ betaIHat);
+		
+		double p0 = offerHistory.get(0).getOfferPrice();
+		double pix = detReg.getCells()[i][j].getCellReservePrice();
+		long ti = time.getTime(); 
+		long tix = detReg.getCells()[i][j].getCellDeadline().getTime();
+		double fittedOffer = 0.0;
+		
+		//calculate the fitted offer using the b value
+		if(tix != 0 && tix != Double.POSITIVE_INFINITY && tix != Double.NEGATIVE_INFINITY){
+			if(betaIHat != 0 && betaIHat != Double.POSITIVE_INFINITY && betaIHat != Double.NEGATIVE_INFINITY){
+				fittedOffer = (p0 + (pix - p0) * Math.pow( (ti * 1.0 / tix) , betaIHat));
+			}else{
+				
+				betaIHat =1.0;
+				fittedOffer = (p0 + (pix - p0) * Math.pow( (ti * 1.0 / tix) , betaIHat));
+			}
+		}else{
+			fittedOffer = p0;
 		}
-
-		return tpSum / t2Sum;
+		
+		System.out.println("fitted offer= "+ fittedOffer+"\n\n");
+		return fittedOffer;
 	}
+	
+	/**
+	 *  Generate time for the given fitted offer.
+	 *  @param detReg: array list of offers. 
+	 *  @param row: row number of the cell.
+	 *  @param col: column number of the cell.
+	 *  @param offerHistory: offerHistory of the opponent.
+	 *  @param numberOfRounds: total number of rounds.
+	 *  @param offerPrice: given offer price.
+	 *  @return time: return time. 
+	 */
+	public Date GeneratedTimeForGivenFittedOffer(DetectionRegion detReg, int row, int col, ArrayList<Offer> offerHistory,
+			int numberOfRounds, double offerPrice) {
 
-	private double logOfBase(double base, double num) {
-		return Math.log(num) / Math.log(base);
-	}
-
-	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
-			int numberOfColumns, Offer newOffer, long stepSize) {
-
-		double base = 0.0;
-		double value = 0.0;
-		double BetaHat = 0.0;
-		double Sum = 0.0;
-		double BetaBar = 0.0;
-
-		for (int i = 0; i < numberOfRows; i++) {
-			for (int j = 0; j < numberOfColumns; j++) {
-
-				base = (detReg.getCells()[i][j].getConcessionPoint().getConcessionPointTime().getTime()
-						- newOffer.getOfferTime().getTime()) / (deadline.getTime() - newOffer.getOfferTime().getTime());
-				value = (newOffer.getOfferPrice()
-						- detReg.getCells()[i][j].getConcessionPoint().getConcessionPointPrice())
-						/ (newOffer.getOfferPrice() - reservePrice);
-				BetaHat = logOfBase(base, value);
-
-				Sum += detReg.getCells()[i][j].getProbability() / (1 + BetaHat);
+		double b = GenerateBValue(detReg, row, col, offerHistory);
+		double p0 = offerHistory.get(0).getOfferPrice();
+		double pix = detReg.getCells()[row][col].getCellReservePrice();
+		long tix = detReg.getCells()[row][col].getCellDeadline().getTime();
+		Date time = new Date();
+		
+		//calculate the time correspond to the given time using the offer calculation formula
+		if((pix - p0)!= 0.0 && (pix - p0)!= Double.POSITIVE_INFINITY &&(pix - p0)!= Double.NEGATIVE_INFINITY){
+			if(b != 0.0 && b != Double.POSITIVE_INFINITY && b != Double.NEGATIVE_INFINITY){
+				time = new Date((long)(Math.pow((Math.abs(offerPrice - p0)/ (pix - p0)), 1 / b) * (tix)));
 			}
 		}
+		
+		return time;
+	}
 
-		BetaBar = (1 / Sum) - 1;
+	/**
+	 *  Calculate log of base. 
+	 */
+	private double logOfBase(double base, double num) {
+		
+		if(num!=0 && base!=0){
+			return Math.log(Math.abs(num)) / Math.log(Math.abs(base));
+		}
+		else{
+			return 0.0;
+		}
+		
+	}
 
-		double offerPrice = (newOffer.getOfferPrice() + ((reservePrice - newOffer.getOfferPrice())
-				* (Math.pow((newOffer.getOfferTime().getTime() + stepSize - newOffer.getOfferTime().getTime())
-						/ (deadline.getTime() - newOffer.getOfferTime().getTime()), BetaBar))));
-		Date offerTime = new Date(newOffer.getOfferTime().getTime() + stepSize);
+	/**
+	 *  Generate next offer. 
+	 */
+	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
+			int numberOfColumns, Offer prevOffer, long stepSize) {
 
-		Offer nextOffer = new Offer(offerPrice, offerTime, newOffer.getRoundNumber() + 1);
+		double base = 0.0; 	double value = 0.0; double BetaHat = 0.0; 	double Sum = 0.0; double BetaBar = 0.0;
+		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0;
+
+		//Traveling through each and every cell
+		for (int i = 0; i < numberOfRows; i++) { //outer for loop
+			for (int j = 0; j < numberOfColumns; j++) { //inner for loop
+
+				//for the sum calculation only used valid cells in the negotiation region
+				if(!detReg.getCells()[i][j].isExpired()){
+					
+					//base value can be 0 if there is an error
+					base = this.calculateBase(detReg, i, j, prevOffer, deadline);
+					
+					//value also can be zero if there is an error
+					value = this.calculateValue(detReg, prevOffer, i, j, reservePrice);
+					
+					//calculate beta hat value
+					BetaHat = logOfBase(base, value);
+					
+ 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat));
+				} 
+				
+			}//end of inner for loop
+		}//end of outer for loop
+		
+		//calculate the beta bar value
+		if(Sum != 0){
+			BetaBar = (double)((1 / Sum) - 1);
+		}
+		else{
+			BetaBar = 1.0;
+		}
+		
+		
+		p0 = prevOffer.getOfferPrice();
+		t = new Date().getTime(); //current time
+		t0 = prevOffer.getOfferTime().getTime();
+		
+		//calculate time ratio
+		if(deadline.getTime()!= t0){
+			timeRatio = ((double) (t - t0)/ (deadline.getTime() - t0));
+		}
+		else{
+			timeRatio = 0;
+		}
+		
+		//calculate the next offer
+		if(BetaBar!= Double.POSITIVE_INFINITY && BetaBar != Double.NEGATIVE_INFINITY){
+			offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
+		}
+		else{
+			offerPrice = p0;
+		}		 
+
+		//create offer object
+		Offer nextOffer = new Offer(offerPrice,new Date(t), (prevOffer.getRoundNumber() + 1));
+		
 		return nextOffer;
+	}
+	
+	/**
+	 *  Generate next offer. 
+	 */
+	public double calculateBase(DetectionRegion detReg, int row, int col , Offer prevOffer, Date deadline ){
+		
+		double base =0.0; long tp = 0; long t0 = 0 ; 
+		
+		tp = detReg.getCells()[row][col].getConcessionPoint().getConcessionPointTime().getTime();
+		t0 = prevOffer.getOfferTime().getTime();
+		
+		if(deadline.getTime() != t0 && tp != t0){
+			base = ((double)( tp- t0 ) / (deadline.getTime() - t0));
+		}
+		else{
+			base = 0.0;
+		}	
+		
+		return base;
+	}
+	
+	/**
+	 *  Generate next offer. 
+	 */
+	public double calculateValue(DetectionRegion detReg, Offer prevOffer, int row, int col, double reservePrice){
+		double value = 0.0; double p0 = 0.0; double pp = 0.0;
+		
+		p0 = prevOffer.getOfferPrice();
+		pp = detReg.getCells()[row][col].getConcessionPoint().getConcessionPointPrice();
+		
+		if(p0!=reservePrice && p0!=pp){
+			value =(double) ((p0	- pp)/ (p0 - reservePrice));
+		}
+		else{
+			value = 0.0;
+		}
+		
+		return value;
 	}
 }
