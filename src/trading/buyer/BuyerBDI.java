@@ -301,6 +301,10 @@ public class BuyerBDI implements INegotiationAgent {
 		}
 		else
 		{
+			
+			for(int i=0; i<services.length; i++){
+				services[i].setacceptablePrice(order, order.getName(), acceptable_price);	
+			}
 			generateNegotiationReport(order, proposals, acceptable_price);
 			
 			throw new PlanFailureException();

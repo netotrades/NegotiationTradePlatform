@@ -607,7 +607,6 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 
 	/**
 	 * Set seller's offer history
-	 * 
 	 * @param name
 	 * @param price
 	 */
