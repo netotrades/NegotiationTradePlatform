@@ -34,11 +34,11 @@ public class BayesianLearner {
 							
 							newConditionalProbability = this.productOfPriorProbAndConditionalProb(i, j, detReg)*1.0 / (sum);
 							detReg.getCells()[i][j].setProbability(newConditionalProbability);
-							System.out.println("set prob @ cell ["+i+","+j+"] = "+ detReg.getCells()[i][j].getProbability());
+							//System.out.println("set prob @ cell ["+i+","+j+"] = "+ detReg.getCells()[i][j].getProbability());
 						}						
 					 } 				
 					
-					System.out.println("posterior probability @ cell ["+i+","+j+"] = "+ detReg.getCells()[i][j].getProbability());
+					//System.out.println("posterior probability @ cell ["+i+","+j+"] = "+ detReg.getCells()[i][j].getProbability());
 				
 				} //end of the inner for loop
 			}// end of outer for loop
@@ -55,7 +55,8 @@ public class BayesianLearner {
 		//initialize the parameters 
 		double pOHi = detReg.getCells()[row][col].getProbability() * 1.0;
 		double gamma =  detReg.getCells()[row][col].getNewGammaValue() * 1.0;				
-				System.out.println("upper ratio = "+ (pOHi * gamma));
+		
+		//System.out.println("upper ratio = "+ (pOHi * gamma));
 				
 		return  (double)(pOHi * gamma);
 	}
@@ -66,7 +67,7 @@ public class BayesianLearner {
 	 */
 	public double SumOfProbabilityDistribution(int numberOfRows, int numberOfColumns, DetectionRegion detReg){
 		
-		System.out.println("======In the sum of probability distribution======");
+		//System.out.println("======In the sum of probability distribution======");
 		
 		//initialize the parameters
 		double sum = 0.0; 
@@ -75,7 +76,7 @@ public class BayesianLearner {
 		for (int i = 0; i < numberOfRows; i++) { //outer for loop
 			for (int j = 0; j < numberOfColumns; j++) { //inner for loop						
 						
-				System.out.println("i= "+i+" , j = "+j ); 
+				//System.out.println("i= "+i+" , j = "+j ); 
 				
 				//probability calculate for valid cells only
 				if(!detReg.getCells()[i][j].isExpired()){
@@ -83,12 +84,12 @@ public class BayesianLearner {
 					double	pOHi = (detReg.getCells()[i][j].getProbability() * 1.0);
 					double gamma =  (detReg.getCells()[i][j].getNewGammaValue()* 1.0);
 					
-					System.out.println("pOHi= "+pOHi+" , gamma = "+gamma );	
+					//System.out.println("pOHi= "+pOHi+" , gamma = "+gamma );	
 					
 					sum += (pOHi * gamma);
 				}
 				
-				System.out.println("sum= "+sum );
+				//System.out.println("sum= "+sum );
 					
 			}//end of inner for loop
 		}//end of outer for loop

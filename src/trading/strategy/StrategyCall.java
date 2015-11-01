@@ -32,7 +32,7 @@ public class StrategyCall {
 	 */
 	public Offer callForStrategy(DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int numberOfRounds, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
 		
-		//To print the agent in print statements
+		/*//To print the agent in print statements
 		String agent="";
 		if(isBuyer){
 			agent = "Buyer: ";
@@ -60,7 +60,7 @@ public class StrategyCall {
 		} 
 		
 
-		System.out.println("\n"+agent+"------------------------------------------------------------------");
+		//System.out.println("\n"+agent+"------------------------------------------------------------------");
 		
 		//print the offer history array list
 		for(int i = 0; i< offerHistory.size(); i++){			
@@ -70,12 +70,12 @@ public class StrategyCall {
 		System.out.println(agent+"------------------------------------------------------------------\n");
 		System.out.println(agent+"\nNow Offer History Length= "+offerHistory.size()+" , current Round = "+ currentRound);
 		
-		System.out.println("\n"+agent+"=====================Before the regression method execution=========================" );			 
+		System.out.println("\n"+agent+"=====================Before the regression method execution=========================" );*/			 
 		
 		//regression analyze the historical offers
-		regressionAnalyser.Analyse(detectionRegion, numberOfRows, numberOfColumns, offerHistory, numberOfRounds, currentRound, isBuyer);
+		regressionAnalyser.Analyse(detectionRegion, numberOfRows, numberOfColumns, offerHistory, currentRound, isBuyer);
 		
-		System.out.println(agent+"=====================After the regression method execution========================= " );
+		//System.out.println(agent+"=====================After the regression method execution========================= " );
 		
 		//before calculating the bayesian learning set the expired cells
 		this.setExpiredCells(detectionRegion, reservePrice, numberOfRows, numberOfColumns, prevOffer, isBuyer);
@@ -86,41 +86,38 @@ public class StrategyCall {
 			 //update the hypothesis of each cell in the detection region using Bayesian learning
 			bayesianLearner.Learn(numberOfRows, numberOfColumns, detectionRegion, currentRound);			
 			
-		}else{
-			
-			System.out.println("offer history list size<=1 and round =1");
-		}
+		} 
 		
-		System.out.println(agent+"=====================After the bayesian learning method execution========================= " );
+		//System.out.println(agent+"=====================After the bayesian learning method execution========================= " );
 
 		
 		//calculate the step size
 		long stepSize = this.getStepSize(currentRound, offerHistory);
-		System.out.println(agent+"\ncalculate step size = "+ stepSize);
+		//System.out.println(agent+"\ncalculate step size = "+ stepSize);
 		
-		System.out.println(agent+"=====================After the step size calculation========================= " );
+		//System.out.println(agent+"=====================After the step size calculation========================= " );
 		
 		//before calculating the concession strategy set the expired cells
 		this.setExpiredCells(detectionRegion, reservePrice, numberOfRows, numberOfColumns, prevOffer, isBuyer);
 		
-		System.out.println(agent+"\n================After setting expired cells==============\n"); 
+		//System.out.println(agent+"\n================After setting expired cells==============\n"); 
 		
 		//Optimal concession strategy : find the concession points for each cell in the negotiation region
 		ConcessionStrategy.FindConcessionPoint(numberOfRows, numberOfColumns, detectionRegion, reservePrice, deadline,
-				stepSize, numberOfRounds, offerHistory, prevOffer , isBuyer);
+				stepSize, offerHistory, prevOffer , isBuyer);
 		
-		System.out.println(agent+"\n================end of the concession points calculations==============\n");		
+		//System.out.println(agent+"\n================end of the concession points calculations==============\n");		
 		
 		
-		this.printConcessionPoints(detectionRegion, numberOfRows, numberOfColumns);
+		//this.printConcessionPoints(detectionRegion, numberOfRows, numberOfColumns);
 		
-		System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
+		//System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
 		
 		
 		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns, prevOffer,
-				stepSize);
+				stepSize, isBuyer);
 		
-		System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");
+		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");
 		 
 		return nextOffer;
 	}
@@ -200,7 +197,7 @@ public class StrategyCall {
 					 }//end of inner if else clause	 
 					 
 				 }//end of outer if clause
-				 System.out.println("cell["+i+","+j+"]: expired= "+detectionRegion.getCells()[i][j].isExpired());
+				 //System.out.println("cell["+i+","+j+"]: expired= "+detectionRegion.getCells()[i][j].isExpired());
 			
 			} //end of  inner for loop			
 		} //end of outer for loop

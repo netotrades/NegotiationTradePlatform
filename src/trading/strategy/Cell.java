@@ -149,9 +149,9 @@ public class Cell {
 	 *  set a new fitted offer only. 
 	 */
 	public void setNewFittedOffer(Offer offer){ 
-		System.out.println("previous offer list size= "+ this.FittedOffers.size());
+		//System.out.println("previous offer list size= "+ this.FittedOffers.size());
 		this.FittedOffers.add(offer);
-		System.out.println("current offer list size= "+ this.FittedOffers.size());
+		//System.out.println("current offer list size= "+ this.FittedOffers.size());
 	}
 	
 	/**

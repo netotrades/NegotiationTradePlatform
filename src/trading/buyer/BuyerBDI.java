@@ -12,23 +12,19 @@ import jadex.bdiv3.annotation.Trigger;
 import jadex.bdiv3.runtime.ChangeEvent;
 import jadex.bdiv3.runtime.impl.PlanFailureException;
 import jadex.bridge.ComponentTerminatedException;
-import jadex.bridge.service.RequiredServiceInfo;
-import jadex.bridge.service.annotation.Service;
+import jadex.bridge.service.RequiredServiceInfo; 
 import jadex.bridge.service.types.clock.IClockService;
 import jadex.commons.Tuple2;
 import jadex.commons.future.CollectionResultListener;
 import jadex.commons.future.DelegationResultListener;
-import jadex.commons.future.Future;
-import jadex.commons.future.IFuture;
+import jadex.commons.future.Future; 
 import jadex.commons.future.IResultListener;
 import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.AgentKilled;
 import jadex.micro.annotation.Argument;
 import jadex.micro.annotation.Arguments;
-import jadex.micro.annotation.Binding;
-import jadex.micro.annotation.ProvidedService;
-import jadex.micro.annotation.ProvidedServices;
+import jadex.micro.annotation.Binding; 
 import jadex.micro.annotation.RequiredService;
 import jadex.micro.annotation.RequiredServices;
 import trading.IBuyItemService;
@@ -215,8 +211,8 @@ public class BuyerBDI implements INegotiationAgent {
 				public void resultAvailable(Integer result)
 				{
 					crl.resultAvailable(new Tuple2<IBuyItemService, Integer>(seller, result));
-					System.out.println("@BuyerBDI: Seller's make proposal = "+ result);
-					System.out.println("@BuyerBDI: Seller's round = "+ (currentRound-1)+"\n===========Buyer got the seller's proposall=====================\n");
+					//System.out.println("@BuyerBDI: Seller's make proposal = "+ result);
+					//System.out.println("@BuyerBDI: Seller's round = "+ (currentRound-1)+"\n===========Buyer got the seller's proposall=====================\n");
 					offerHistory.add(new Offer(result,currentTime,(currentRound-1)));
 				}
 						
@@ -267,16 +263,7 @@ public class BuyerBDI implements INegotiationAgent {
 			//generate the offers using the model strategy
 			generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()* 1.0, order.getLimit()*1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns,this.buyerPreviousOffer, true);
 			System.out.println("generated offer = "+generatedOffer.getOfferPrice());
-			
-			if(this.currentRound == 0){				
-				acceptable_price = order.getStartPrice();
-			}				
-			else 
-			{					
-				//set the start price as the acceptable price
-				acceptable_price = order.getStartPrice()+(5*currentRound);
-			}
-			 
+  			 
 			acceptable_price =  (int) generatedOffer.getOfferPrice();
 		} 
 		
@@ -321,16 +308,16 @@ public class BuyerBDI implements INegotiationAgent {
 		
 		// Initialize the detection region of the seller
 		double detRegLowerPriceBoundary = (order.getStartPrice() + order.getLimit())* 0.5;
-		System.out.println("Buyer: Lower price = "+ detRegLowerPriceBoundary);
+		//System.out.println("Buyer: Lower price = "+ detRegLowerPriceBoundary);
 		
 		double detRegUpperPriceBoundary = order.getLimit() +(order.getLimit() - order.getStartPrice())* 0.5;
-		System.out.println("Buyer: Upper price = "+ detRegUpperPriceBoundary); 
+		//System.out.println("Buyer: Upper price = "+ detRegUpperPriceBoundary); 
 		
 		Date detRegLowerTimeBoundary = new Date((order.getDeadline().getTime() + currentTime.getTime())/2);
-		System.out.println("Buyer: Lower time = "+ detRegLowerTimeBoundary);
+		//System.out.println("Buyer: Lower time = "+ detRegLowerTimeBoundary);
 		
 		Date detRegUpperTimeBoundary = new Date(order.getDeadline().getTime() + ((order.getDeadline().getTime()-currentTime.getTime())*1/2));
-		System.out.println("Buyer: Upper time = "+ detRegUpperTimeBoundary);
+		//System.out.println("Buyer: Upper time = "+ detRegUpperTimeBoundary);
 		
 		// Initialize the detection region
 		this.detectionRegion = new DetectionRegion(detRegLowerPriceBoundary, detRegUpperPriceBoundary, detRegLowerTimeBoundary, detRegUpperTimeBoundary, numberOfRows, numberOfColumns);
@@ -394,7 +381,7 @@ public class BuyerBDI implements INegotiationAgent {
 		//initialize the detection region of the buyer
 		this.setDetectionRegion(order, this.currentTime);
 
-		System.out.println("Buyer: create Goal  @ round: "+ (currentRound));
+		//System.out.println("Buyer: create Goal  @ round: "+ (currentRound));
 	}
 
 	/**

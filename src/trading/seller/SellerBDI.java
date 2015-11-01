@@ -292,8 +292,8 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		String neg_strategy = order.getNegotiationStrategy();
 		
 		//initialize the acceptable price
-		int acceptable_price = 0;
-
+		int acceptable_price = 0; Offer generatedOffer;
+		
 		// Use most urgent order for preparing proposal.
 
 		//if an order is available
@@ -324,87 +324,20 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			else if (neg_strategy.equals("strategy-3")) { 
 				 
 				System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 3  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");
-
-				if(this.currentRound == 0){
-					
-					acceptable_price = order.getStartPrice();
-				}
- 				
-				else  
-				{		 			
-					//generate the offers using the model strategy
-					strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
-										
-					//set the start price as the acceptable price
-					acceptable_price = order.getStartPrice()-(5* this.currentRound);
-					
-					
-					System.out.println("Seller: buyers offer history size=  "+ this.offerHistory.size());
-					
-					System.out.println("\nseller===============Buyer'S OFFER HISTORY==========================");
-					
-					if(this.offerHistory.size()>0){
-						for(int i=0; i<this.offerHistory.size() ; i++ ){
-							System.out.println(" offer History @ "+i+"= "+this.offerHistory.get(i).getOfferPrice());
-						}
-					}
-					
-				}	
+				
+				//generate the offers using the model strategy
+				generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				
+				System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
+				System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
+				acceptable_price =  (int) generatedOffer.getOfferPrice();	
 							
 			} 			
 			
 			System.out.println("Seller: @ round= "+this.currentRound+" , offer = "+ acceptable_price);
 			//set the buyer current offer as the previous offer of the buyer
 			this.setSellerPreviousOffer(acceptable_price, this.currentTime, this.currentRound);	
-			
-			/*
-			
-			goal.acceptedPrice = acceptable_price;
-			
-			// Find available seller agents.
-			ISellItemService[]	services = agent.getServiceContainer().getRequiredServices("sellservice").get().toArray(new ISellItemService[0]);
-			
-			System.out.println("isell item service array length: "+services.length);
-			
-			if(services.length == 0)
-			{
-	            System.out.println("No seller found, purchase failed."); 
-			}
-			
-			System.out.println("Before the reply for proposal");
-			// Initiate a Reply-for-proposal.
-			Future<Collection<Tuple2<ISellItemService, Integer>>>	cfp	= new Future<Collection<Tuple2<ISellItemService, Integer>>>();
-			System.out.println("SellerBDI: After creating cfp");
-			
-			final CollectionResultListener<Tuple2<ISellItemService, Integer>>	crl	= new CollectionResultListener<Tuple2<ISellItemService, Integer>>(services.length, true,
-				new DelegationResultListener<Collection<Tuple2<ISellItemService, Integer>>>(cfp));
-			System.out.println("SellerBDI: After creating crl");
-			
-			System.out.println("SellerBDI: service length= "+ services.length);
-			for(int i=0; i<services.length; i++)
-			{
-				System.out.println("Inside service for loop, i = "+ i);
-				final ISellItemService	buyer	= services[i];
-				System.out.println("After creating isell service buyer");
-				
-				buyer.replyForProposal(order).addResultListener(new IResultListener<Integer>()
-				{ 
-					public void resultAvailable(Integer result)
-					{ 
-						crl.resultAvailable(new Tuple2<ISellItemService, Integer>(buyer, result)); 						
-						offerHistory.add(new Offer(result,new Date(),currentRound)); 
-						System.out.println("In the Seller class, Buyer: call for proposal= " +result +" @ round: "+ currentRound);
-						
-					}
-					
-					public void exceptionOccurred(Exception exception)
-					{
-						crl.exceptionOccurred(exception);
-					}
-				});
-			}*/
-			
-			
+			 
 			agent.getLogger().info(agent.getAgentName()+" proposed: " + acceptable_price);
 			
 			// Store proposal data in plan parameters.
@@ -449,6 +382,10 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	@Plan(trigger=@Trigger(goals=ExecuteTask.class))
 	protected void executeTask(ExecuteTask goal)
 	{
+
+		int acceptable_price = 0; 
+		Offer generatedOffer;
+		
 		// Search suitable open orders.
 		final long time = this.getTime();
 		this.currentTime = new Date(this.getTime());
@@ -470,7 +407,6 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		});
 		Order order = orders.get(0);
 		String neg_strategy = order.getNegotiationStrategy();
-		int acceptable_price = 0;
 
 		// Use most urgent order for preparing proposal.
 
@@ -496,24 +432,18 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			//Strategy 3- Main strategy
 			else if (neg_strategy.equals("strategy-3 @ execute task")) { 
 				
-				System.out.println("seller: strategy - 3\n----------------------------");
+				/*System.out.println("seller: strategy - 3\n----------------------------");
 				
-				if(this.currentRound == 0){
-					
-					acceptable_price = order.getStartPrice();
-				}
- 				
-				else  
-				{				
-					
-					//generate the offers using the model strategy
-					strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
-					
-					//set the start price as the acceptable price
-					acceptable_price = order.getStartPrice()-(5* this.currentRound);
-				}			
+ 				//generate the offers using the model strategy
+				generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				
+				System.out.println("generated offer = "+generatedOffer.getOfferPrice());*/
+	  			 
+				acceptable_price =  order.getLimit();			
+				 System.out.println(acceptable_price); 
 				 
 			}  
+			
 			System.out.println("S: acceptable price= "+ acceptable_price);		
 
 
@@ -615,7 +545,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			offerHistory.add(new Offer(price, new Date(), currentRound));
 		}
 		for (int i = 0; i < offerHistory.size(); i++) {
-			System.out.println("Offer from buyer" + offerHistory.get(i).getOfferPrice());
+			//System.out.println("Offer from buyer" + offerHistory.get(i).getOfferPrice());
 		}
 	}
 
@@ -648,7 +578,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		//initialize the detection region of the buyer
 		this.setDetectionRegion(order, this.currentTime);
 		
-		System.out.println("Seller: create Goal  @ round: "+ (this.currentRound));
+		//System.out.println("Seller: create Goal  @ round: "+ (this.currentRound));
 	}
 
 	/**

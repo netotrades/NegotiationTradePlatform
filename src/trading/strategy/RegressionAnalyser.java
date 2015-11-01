@@ -17,7 +17,7 @@ public class RegressionAnalyser {
 	/**
 	 *  Analyze the offer. 
 	 */
-	public void Analyse(DetectionRegion detReg, int numberOfRows, int numberOfColumns, ArrayList<Offer> offerHistory, int numberOfRounds, int currentRound, boolean isBuyer){
+	public void Analyse(DetectionRegion detReg, int numberOfRows, int numberOfColumns, ArrayList<Offer> offerHistory,int currentRound, boolean isBuyer){
  		
 		if(offerHistory.size()>0){
 			
@@ -25,39 +25,39 @@ public class RegressionAnalyser {
 			for(int i = 0; i < numberOfRows; i++){ //outer for loop			
 				for(int j = 0; j < numberOfColumns; j++){ //inner for loop	
 					
-					System.out.println("\n cell["+i+", "+j+"]\n------------");
+					//System.out.println("\n cell["+i+", "+j+"]\n------------");
 					
 					//calculate the fitted offer of the cell[i,j]
 					double offer = calculator.GenerateFittedOffer(detReg, i, j, offerHistory);
 					
-					System.out.println("\nCalculated fitted offer = "+ offer);
+					//System.out.println("\nCalculated fitted offer = "+ offer);
 					
 					//create a offer object from the calculated fitted offer
 					Offer offerObj = new Offer(offer, offerHistory.get(offerHistory.size()-1).getOfferTime(), (offerHistory.size()-1));
 					
-					System.out.println("create offer object successfully");
-					System.out.println("offer history array size = "+ offerHistory.size()); 
-					System.out.println("fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size()); 
+					//System.out.println("create offer object successfully");
+					//System.out.println("offer history array size = "+ offerHistory.size()); 
+					//System.out.println("fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size()); 
 						
 					//add the fitted offer to the cell 				
 					detReg.getCells()[i][j].setNewFittedOffer(offerObj);
 					
-					System.out.println(" New fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size());
-					System.out.println("added offer = "+ detReg.getCells()[i][j].getFittedOffers().get(detReg.getCells()[i][j].getFittedOffers().size()-1).getOfferPrice());
+					//System.out.println(" New fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size());
+					//System.out.println("added offer = "+ detReg.getCells()[i][j].getFittedOffers().get(detReg.getCells()[i][j].getFittedOffers().size()-1).getOfferPrice());
 	 
 					if( currentRound > 0 ){
 						//calculate p_bar : average of the offer history
 						double avgHistory = calculator.FindAverage(offerHistory);					
-						System.out.println("history offers average = "+ avgHistory);
+						//System.out.println("history offers average = "+ avgHistory);
 						
 						//calculate p_hat_bar : average of the fitted offer history
 						double avgFitted = calculator.FindAverage(detReg.getCells()[i][j].getFittedOffers());
-						System.out.println("fitted offers average = "+ avgFitted);
+						//System.out.println("fitted offers average = "+ avgFitted);
 						
 						//calculate the gamma value
 						double gammaValue = calculator.generateGammaValue(offerHistory, avgHistory, avgFitted, i, j, detReg , numberOfRows, numberOfColumns);	
 						
-						System.out.println("gamma value = "+ gammaValue);
+						//System.out.println("gamma value = "+ gammaValue);
 						
 						if(gammaValue != 0.0 && gammaValue != Double.POSITIVE_INFINITY && gammaValue != Double.NEGATIVE_INFINITY){
 							detReg.getCells()[i][j].setNewGammaValue(gammaValue);
@@ -67,8 +67,8 @@ public class RegressionAnalyser {
 							detReg.getCells()[i][j].setNewGammaValue(gammaValue);
 						}
 						
-						System.out.println("gamma value = "+ gammaValue);
-						System.out.println("added gamma value : "+ detReg.getCells()[i][j].getNewGammaValue());	
+						//System.out.println("gamma value = "+ gammaValue);
+						//System.out.println("added gamma value : "+ detReg.getCells()[i][j].getNewGammaValue());	
 					}
 					
 				} //end of the inner for loop
