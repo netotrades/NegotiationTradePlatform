@@ -33,6 +33,15 @@ public class AdaptiveConcessionStrategy {
 	
 	/**
 	 *  Method to find concession point for each and every cell in the detection region. 
+	 *  @param numberOfRows: number of rows in the detection region. 
+	 *  @param numberOfColumns: row number of the cell.
+	 *  @param detReg: detection region.
+	 *  @param reservePrice: reserve price. 
+	 *  @param deadline: deadline.
+	 *  @param stepSize: step size for one negotiation round. 
+	 *  @param offerHistory: offer history of the opponent.
+	 *  @param prevOffer: previous offer.
+	 *  @param isBuyer: whether a buyer or not. 
 	 */
 	public void FindConcessionPoint(int numberOfRows, int numberOfColumns, DetectionRegion detReg, double reservePrice, Date deadline, long stepSize, ArrayList<Offer> offerHistory, Offer prevOffer, boolean isBuyer){
 		//System.out.println("\n==========This is the find concession point method==================\n");
@@ -112,6 +121,13 @@ public class AdaptiveConcessionStrategy {
 	
 	/**
 	 *  identify the concession strategy according to the buyers perspective. 
+	 *  @param row: row number of the cell.
+	 *  @param col: column number of the cell.
+	 *  @param detReg: detection region. 
+	 *  @param reservePrice: reserve price.
+	 *  @param deadline: deadline. 
+	 *  @param stepSize: step size of the negotiation round.
+	 *  @param offerhistory: column number of the cell. 
 	 */
 	public void buyerConcessionStrategyForGivenCell(int row, int col, DetectionRegion detReg, double reservePrice, Date deadline, long stepSize, ArrayList<Offer> offerHistory){
 				 

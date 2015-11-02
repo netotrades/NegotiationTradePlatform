@@ -211,7 +211,16 @@ public class Calculator {
 
 	/**
 	 *  Generate gamma value for the given cell: 
-	 *  To check the non-linear correlation between historical offers and the fitted offers. 
+	 *  To check the non-linear correlation between historical offers and the fitted offers.
+	 *  @param offerHistory: offerHistory of the opponent. 
+	 *  @param avgHistory: average value of the opponent history offers.
+	 *  @param avgFitted: average value of the opponent fitted offers.
+	 *  @param row: row number of the given cell.
+	 *  @param col: column number of the given cell. 
+	 *  @param detReg: detection region.
+	 *  @param numberOfRows: number of the rows in the detection region.
+	 *  @param numberOfColumns: number of the columns of the detection region .
+	 *  @return foundGamma: calculated gamma value. 
 	 */
 	public double generateGammaValue(ArrayList<Offer> offerHistory, double avgHistory, double avgFitted, int row,
 			int col, DetectionRegion detReg,  int numberOfRows, int numberOfColumns) {
@@ -274,8 +283,7 @@ public class Calculator {
 	 *  @param detReg: array list of offers. 
 	 *  @param row: row number of the cell.
 	 *  @param col: column number of the cell.
-	 *  @param offerHistory: offerHistory of the opponent.
-	 *  @param numberOfRounds: total number of rounds.
+	 *  @param offerHistory: offerHistory of the opponent. 
 	 *  @param time: given time.
 	 *  @return fittedOffer: return fitted offer. 
 	 */
@@ -322,8 +330,7 @@ public class Calculator {
 	 *  @param detReg: array list of offers. 
 	 *  @param row: row number of the cell.
 	 *  @param col: column number of the cell.
-	 *  @param offerHistory: offerHistory of the opponent.
-	 *  @param numberOfRounds: total number of rounds.
+	 *  @param offerHistory: offerHistory of the opponent. 
 	 *  @param offerPrice: given offer price.
 	 *  @return time: return time. 
 	 */
@@ -347,7 +354,10 @@ public class Calculator {
 	}
 
 	/**
-	 *  Calculate log of base. 
+	 *  Calculate log of base.
+	 *  @param base: base for calculate log value. 
+	 *  @param num: number for calculate log value.
+	 *  @return log: return calculated log for given base and the number.  
 	 */
 	private double logOfBase(double base, double num) {
 		
@@ -361,7 +371,17 @@ public class Calculator {
 	}
 
 	/**
-	 *  Generate next offer. 
+	 *  Generate next offer.
+	 *  @param detReg: detection region. 
+	 *  @param reservePrice: reserve price.
+	 *  @param deadline: deadline. 
+	 *  @param numberOfRows: number Of Rows in the detection region.
+	 *  @param numOfColumns: number of columns in the detection region. 
+	 *  @param prevPrice: previous offer price.
+	 *  @param stepSize: negotiation step size for a round. 
+	 *  @param isBuyer: whether buyer or not.
+	 *  @param offerHistory: offerHistory of the opponent. 
+	 *  @return nextOffer: counter offer for the opponent.  
 	 */
 	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
 			int numberOfColumns, Offer prevOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory) {
@@ -455,6 +475,7 @@ public class Calculator {
 			
 			//if generated offer is exceed the opponents last offer
 			if(isBuyer && offerPrice >= opponentLastOffer ){
+				//set the opponent last offer as the next offer
 				offerPrice = opponentLastOffer;
 			}
 			else if(!isBuyer && offerPrice <= opponentLastOffer){
@@ -473,7 +494,13 @@ public class Calculator {
 	}
 	
 	/**
-	 *  Generate next offer. 
+	 *  Generate next offer.
+	 *  @param detReg: detection Region. 
+	 *  @param row: row number of the given cell.
+	 *  @param col: column number of the given cell. 
+	 *  @param prevOffer: previous offer.  
+	 *  @param deadline: deadline.
+	 *  @return base: calculated base value
 	 */
 	public double calculateBase(DetectionRegion detReg, int row, int col , Offer prevOffer, Date deadline ){
 		
@@ -495,7 +522,12 @@ public class Calculator {
 	}
 	
 	/**
-	 *  Generate next offer. 
+	 *  Generate next offer.
+	 *  @param detReg: detection Region.    
+	 *  @param prevOffer: previous offer. 
+	 *  @param row: row number of the given cell.
+	 *  @param col: column number of the given cell. 
+	 *  @return base: calculated base value 
 	 */
 	public double calculateValue(DetectionRegion detReg, Offer prevOffer, int row, int col, double reservePrice){
 		double value = 0.0; double p0 = 0.0; double pp = 0.0;

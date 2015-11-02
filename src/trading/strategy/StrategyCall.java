@@ -209,6 +209,9 @@ public class StrategyCall {
 	
 	/**
 	 *  print all the concession points in the region.
+	 *  @param detectionRegion: detectionRegion
+	 *  @param numberOfRows: number of rows in the detection region
+	 *  @param numberOfColumns: number of columns in th detection region
 	 */
 	public void printConcessionPoints(DetectionRegion detectionRegion, int numberOfRows, int numberOfColumns){
 		for(int i=0; i< numberOfRows; i++){
