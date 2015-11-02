@@ -287,7 +287,7 @@ public class Calculator {
 		//calculate the b value : here b is referred to as the 'betaIHat' value
 		double betaIHat = GenerateBValue(detReg, i, j, offerHistory);
 
-		System.out.println("\n----------beta i hat = "+ betaIHat);
+		//System.out.println("\n----------beta i hat = "+ betaIHat);
 		
 		double p0 = offerHistory.get(0).getOfferPrice();
 		double pix = detReg.getCells()[i][j].getCellReservePrice();
@@ -295,10 +295,10 @@ public class Calculator {
 		long tix = detReg.getCells()[i][j].getCellDeadline().getTime();
 		double fittedOffer = 0.0;
 		
-		System.out.println(" p0 ="+ p0);
+		/*System.out.println(" p0 ="+ p0);
 		System.out.println("pix ="+ pix);
 		System.out.println(" ti ="+ ti);
-		System.out.println("tix ="+ tix);
+		System.out.println("tix ="+ tix);*/
 		
 		//calculate the fitted offer using the b value
 		if(tix != 0 && tix != Double.POSITIVE_INFINITY && tix != Double.NEGATIVE_INFINITY){
@@ -313,7 +313,7 @@ public class Calculator {
 			fittedOffer = p0;
 		}
 		
-		System.out.println("@ generated fitteded offer for given time fitted offer= "+ fittedOffer+"\n\n");
+		//System.out.println("@ generated fitteded offer for given time fitted offer= "+ fittedOffer+"\n\n");
 		return fittedOffer;
 	}
 	
@@ -342,7 +342,7 @@ public class Calculator {
 				time = new Date((long)(Math.pow((Math.abs(offerPrice - p0)/ (pix - p0)), 1 / b) * (tix)));
 			}
 		}
-		System.out.println("@ generate time for given fitted offer method "+time);
+		//System.out.println("@ generate time for given fitted offer method "+time);
 		return time;
 	}
 
@@ -364,18 +364,18 @@ public class Calculator {
 	 *  Generate next offer. 
 	 */
 	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
-			int numberOfColumns, Offer prevOffer, long stepSize, boolean isBuyer) {
+			int numberOfColumns, Offer prevOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory) {
 
 		double base = 0.0; 	double value = 0.0; double BetaHat = 0.0; 	double Sum = 0.0; double BetaBar = 0.0;
-		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; Date currentTime = new Date();
+		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; 
 		 
 		
 		Offer nextOffer;
 		
-		if(detReg.getCells()[0][0].getFittedOffers().size()==1 && isBuyer){ 
+		if(offerHistory.size()==1 && isBuyer){ 
 			nextOffer = new Offer(prevOffer.getOfferPrice(), new Date(),0);
 		}
-		else if(detReg.getCells()[0][0].getFittedOffers().size()>0 ){
+		else if(offerHistory.size()>0 ){
 			
 			//Traveling through each and every cell
 			for (int i = 0; i < numberOfRows; i++) { //outer for loop
@@ -395,7 +395,7 @@ public class Calculator {
 						
 	 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat));System.out.println("Sum"+Sum);
 					} 
-					System.out.println();
+					//System.out.println();
 				}//end of inner for loop
 			}//end of outer for loop
 			
@@ -420,43 +420,54 @@ public class Calculator {
 			else{
 				timeRatio = 0.0;
 			}
-			System.out.println("sum = "+ Sum);
+			/*System.out.println("sum = "+ Sum);
 			System.out.println("betabar "+BetaBar);
 			System.out.println("time ratio "+timeRatio);
 			System.out.println("power "+(Math.pow(timeRatio, BetaBar)));
-			System.out.println("po + "+((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
+			System.out.println("po + "+((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));*/
 			//calculate the next offer
 			if(BetaBar!= Double.POSITIVE_INFINITY && BetaBar != Double.NEGATIVE_INFINITY){
 				if(timeRatio!= Double.POSITIVE_INFINITY && timeRatio != Double.NEGATIVE_INFINITY){
 					 if((p0 < reservePrice) && isBuyer){
 						offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
-						System.out.println("Buyer offer cal = "+offerPrice);
+						//System.out.println("Buyer offer cal = "+offerPrice);
 					}
 					else if((p0 > reservePrice) && !isBuyer){
 						offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
-						System.out.println("Seller offer cal = "+offerPrice);
+						//System.out.println("Seller offer cal = "+offerPrice);
 					}
 					else{
 						offerPrice = reservePrice;
-						System.out.println("p0 exceed the reserve price "+offerPrice);
+						//System.out.println("p0 exceed the reserve price "+offerPrice);
 					}
 				}
 				else{
 					offerPrice = reservePrice;
-					System.out.println("error in time ratio "+timeRatio);
+					//System.out.println("error in time ratio "+timeRatio);
 				}
 			} 
 			else{
 				offerPrice = reservePrice;
-				System.out.println("error in time beta bar "+BetaBar);
+				//System.out.println("error in time beta bar "+BetaBar);
 			} 
+			
+			double opponentLastOffer = offerHistory.get((offerHistory.size()-1)).getOfferPrice();
+			
+			//if generated offer is exceed the opponents last offer
+			if(isBuyer && offerPrice >= opponentLastOffer ){
+				offerPrice = opponentLastOffer;
+			}
+			else if(!isBuyer && offerPrice <= opponentLastOffer){
+				offerPrice = opponentLastOffer;
+			}
+			
 			
 			//create offer object
 			nextOffer = new Offer(offerPrice,new Date(t), (prevOffer.getRoundNumber() + 1));
 		}
 		else{
 			nextOffer = new Offer(prevOffer.getOfferPrice(),new Date(), 0);
-			System.out.println("1st offer");
+			//System.out.println("1st offer");
 		} 
 		return nextOffer;
 	}
@@ -470,8 +481,8 @@ public class Calculator {
 		
 		tp = detReg.getCells()[row][col].getConcessionPoint().getConcessionPointTime().getTime();
 		t0 = prevOffer.getOfferTime().getTime();
-		System.out.println("tp"+ tp);
-		System.out.println("t0"+ t0);
+		/*System.out.println("tp"+ tp);
+		System.out.println("t0"+ t0);*/
 		
 		if(deadline.getTime() != t0 && tp != t0){
 			base = ((double)( tp- t0 ) / (deadline.getTime() - t0));System.out.println("base = "+ base);
@@ -491,18 +502,18 @@ public class Calculator {
 		
 		p0 = prevOffer.getOfferPrice();
 		pp = detReg.getCells()[row][col].getConcessionPoint().getConcessionPointPrice();
-		System.out.println("cell ;"+row+","+col);
+		/*System.out.println("cell ;"+row+","+col);
 		System.out.println("p0 = "+ p0);
-		System.out.println("pp = "+ pp);
+		System.out.println("pp = "+ pp);*/
 		
 		if(p0!=reservePrice && p0!= pp){
 			value =(double) ((p0 - pp)/ (p0 - reservePrice));
-			System.out.println("value ="+value);
+			//System.out.println("value ="+value);
 		}
 		else{
 			value = 1.0;
 		}
-		System.out.println();
+		//System.out.println();
 		return value;
 	}
 }

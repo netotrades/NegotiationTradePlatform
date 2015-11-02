@@ -115,7 +115,7 @@ public class StrategyCall {
 		
 		
 		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns, prevOffer,
-				stepSize, isBuyer);
+				stepSize, isBuyer, offerHistory);
 		
 		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");
 		 

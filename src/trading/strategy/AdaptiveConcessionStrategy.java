@@ -118,7 +118,7 @@ public class AdaptiveConcessionStrategy {
 		//concession strategy scenario : 1
 		if(( tix < T) && (pix > p0)){
 			
-			System.out.println("this is strategy 1");
+			//System.out.println("this is strategy 1");
 			
 			//get random point as the concession point
 			this.concessionPrice = pix;
@@ -129,7 +129,7 @@ public class AdaptiveConcessionStrategy {
 		//concession strategy scenario : 2
 		else if((tix >= T) && (pix >= p0)){
 			
-			System.out.println("this is strategy 2");
+			//System.out.println("this is strategy 2");
 			
 			//case 1: line l2 - regression line which does not travel across the negotiation region
 			if( opponentOfferAtTb > reservePrice){
@@ -156,7 +156,7 @@ public class AdaptiveConcessionStrategy {
 		//concession strategy scenario : 3
 		else if(( tix < T) && (pix < p0)){
 			
-			System.out.println("this is strategy 3");
+			//System.out.println("this is strategy 3");
 			
 			//case 1: line l1 - regression line which travels across the negotiation region
 			if( opponentOfferAtT0 > p0){
@@ -186,7 +186,7 @@ public class AdaptiveConcessionStrategy {
 		//concession strategy scenario : 4
 		else if(( tix >= T) && (pix <= p0)){
 			
-			System.out.println("this is strategy 4");
+			//System.out.println("this is strategy 4");
 			
 			//case 1: line l3 - regression line which does not travel across the negotiation region but underneath of the negotiation region
 			if( opponentOfferAtT0 < p0){
@@ -233,10 +233,7 @@ public class AdaptiveConcessionStrategy {
 			} //end of the case 4					
 		
 		}//end of the concession strategy scenario : 4
-		
-		if(this.concessionPrice == Double.NaN){
-			this.concessionPrice = reservePrice;
-		} 
+		 
 		
 		//System.out.println("This is the end of this methodd\n");
 	}
@@ -251,7 +248,7 @@ public class AdaptiveConcessionStrategy {
 		
 		//concession strategy scenario : 1
 		if(( tix < T) && (pix < p0)){
-			System.out.println("this is strategy 1");
+			//System.out.println("this is strategy 1");
 			
 			//get random point as the concession point
 			this.concessionPrice = pix;
@@ -262,7 +259,7 @@ public class AdaptiveConcessionStrategy {
 		//concession strategy scenario : 2
 		else if((tix >= T) && (pix <= p0)){
 			
-			System.out.println("this is strategy 2");
+			//System.out.println("this is strategy 2");
 			//case 1: line l2 - regression line which does not travel across the negotiation region
 			if( opponentOfferAtTb < reservePrice){
 				
@@ -287,7 +284,7 @@ public class AdaptiveConcessionStrategy {
 		
 		//concession strategy scenario : 3
 		else if(( tix < T) && (pix > p0)){
-			System.out.println("this is strategy 3");
+			//System.out.println("this is strategy 3");
 			
 			//case 1: line l1 - regression line which travels across the negotiation region
 			if( opponentOfferAtT0 < p0){
@@ -316,11 +313,11 @@ public class AdaptiveConcessionStrategy {
 		
 		//concession strategy scenario : 4
 		else if(( tix >= T) && (pix >= p0)){
-			System.out.println("this is strategy 4");
+			//System.out.println("this is strategy 4");
 			
 			//case 1: line l3 - regression line which does not travel across the negotiation region but underneath of the negotiation region
 			if( opponentOfferAtT0 < p0){
-				System.out.println("line 3");
+				//System.out.println("line 3");
 				// random value piMin belongs to the range (0 < piMin <<<<< 1)
 				this.piMin = (0.20 - ((0.20 - 0.01)* Math.random()));
 				
@@ -332,7 +329,7 @@ public class AdaptiveConcessionStrategy {
 			
 			//case 2: line l4 - regression line which does not travel across the negotiation region and goes over the negotiation region
 			else if( opponentOfferAtTb < reservePrice ){
-				System.out.println("line 4");
+				//System.out.println("line 4");
 				// random value piMin belongs to the range (0 < piMin <<<<< 1)
 				this.piMin = (0.10 - ((0.10 - 0.01)* Math.random()));
 				
@@ -344,7 +341,7 @@ public class AdaptiveConcessionStrategy {
 			
 			//case 3: line l1 - regression line which travels across the negotiation region and goes between the reserve price and the p0 at the deadline
 			else if(opponentOfferAtTb <= reservePrice && opponentOfferAtTb < p0){
-				System.out.println("line 1");
+				//System.out.println("line 1");
 				//set the point which is in the previous step to the deadline and on the regression line
 				this.concessionTime = new Date(deadline.getTime() - stepSize);
 				this.concessionPrice = calculator.GenerateFittedOfferForGivenTime(detReg, row, col, offerHistory, concessionTime);
@@ -353,10 +350,10 @@ public class AdaptiveConcessionStrategy {
 			
 			//case 4: line l2- regression line which travels across the negotiation region and goes underneath the p0 line at the dead line
 			else{ 
-				System.out.println("line 4");
+				//System.out.println("line 4");
 				//calculate the time at the offer p0
 				this.timeAtOfferP0 = calculator.GeneratedTimeForGivenFittedOffer(detReg, row, col, offerHistory, p0);
-				System.out.println("time@p0"+this.timeAtOfferP0);
+				//System.out.println("time@p0"+this.timeAtOfferP0);
 				//set the point in which is in the previous step to the p0 price line interception and on the regression line
 				this.concessionTime = new Date(timeAtOfferP0.getTime() - stepSize);
 				this.concessionPrice = calculator.GenerateFittedOfferForGivenTime(detReg, row, col, offerHistory, concessionTime);
@@ -364,10 +361,7 @@ public class AdaptiveConcessionStrategy {
 			} //end of the case 4					
 		
 		}//end of the concession strategy scenario : 4
-		
-		if(this.concessionPrice == Double.NaN){
-			this.concessionPrice = reservePrice;
-		}
+		 
 	}
 	
 	
@@ -375,7 +369,7 @@ public class AdaptiveConcessionStrategy {
 	/**
 	 *  Generate next offer. 
 	 */
-	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows, int numberOfColumns, Offer newOffer, long stepSize, boolean isBuyer){
-		return calculator.GenerateNextOffer(detReg, reservePrice,deadline, numberOfRows, numberOfColumns, newOffer, stepSize, isBuyer);
+	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows, int numberOfColumns, Offer newOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory){
+		return calculator.GenerateNextOffer(detReg, reservePrice,deadline, numberOfRows, numberOfColumns, newOffer, stepSize, isBuyer, offerHistory);
 	}
 }
