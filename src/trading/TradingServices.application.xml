@@ -40,7 +40,7 @@
 						<argument name="initial_orders">
 							new Order[]
 							{
-								new Order("All about agents", new Date($properties.clock.getTime()+60000), 100, 120, true, $properties.clock,"strategy-3")
+								new Order("All about agents", new Date($properties.clock.getTime()+60100), 100, 120, true, $properties.clock,"strategy-3")
 							}
 						</argument>
 					</arguments>
@@ -50,7 +50,7 @@
 						<argument name="initial_orders">
 							new Order[]
 							{
-								new Order("All about agents", new Date($properties.clock.getTime()+60000), 130, 110, false, $properties.clock,"strategy-3")
+								new Order("All about agents", new Date($properties.clock.getTime()+60100), 130, 110, false, $properties.clock,"strategy-3")
 							}
 						</argument>
 					</arguments>

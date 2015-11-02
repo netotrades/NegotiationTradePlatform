@@ -94,7 +94,7 @@ public class BayesianLearner {
 			}//end of inner for loop
 		}//end of outer for loop
 		
-		System.out.println("\nlower ratio = "+ sum);
+		//System.out.println("\nlower ratio = "+ sum);
 		return sum;
 	}
 	

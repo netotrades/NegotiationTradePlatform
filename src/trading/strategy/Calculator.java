@@ -411,9 +411,9 @@ public class Calculator {
 						value = this.calculateValue(detReg, prevOffer, i, j, reservePrice);
 						
 						//calculate beta hat value
-						BetaHat = this.logOfBase(base, value);System.out.println("BetaHat"+BetaHat);
+						BetaHat = this.logOfBase(base, value); //System.out.println("BetaHat"+BetaHat);
 						
-	 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat));System.out.println("Sum"+Sum);
+	 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat)); //System.out.println("Sum"+Sum);
 					} 
 					//System.out.println();
 				}//end of inner for loop
@@ -512,7 +512,7 @@ public class Calculator {
 		System.out.println("t0"+ t0);*/
 		
 		if(deadline.getTime() != t0 && tp != t0){
-			base = ((double)( tp- t0 ) / (deadline.getTime() - t0));System.out.println("base = "+ base);
+			base = ((double)( tp- t0 ) / (deadline.getTime() - t0)); //System.out.println("base = "+ base);
 		}
 		else{
 			base = 1.0;

@@ -292,7 +292,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		String neg_strategy = order.getNegotiationStrategy();
 		
 		//initialize the acceptable price
-		int acceptable_price = 0; Offer generatedOffer;
+		int acceptable_price = 0; 
 		
 		// Use most urgent order for preparing proposal.
 
@@ -326,7 +326,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 3  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");
 				
 				//generate the offers using the model strategy
-				generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				Offer generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
 				
 				System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
 				System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
@@ -383,8 +383,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	protected void executeTask(ExecuteTask goal)
 	{
 
-		int acceptable_price = 0; 
-		Offer generatedOffer;
+		int acceptable_price = 0;  
 		
 		// Search suitable open orders.
 		final long time = this.getTime();
@@ -405,6 +404,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				return prio1>prio2? 1: prio1<prio2? -1: o1.hashCode()-o2.hashCode();
 			}
 		});
+		
 		Order order = orders.get(0);
 		String neg_strategy = order.getNegotiationStrategy();
 
@@ -430,25 +430,25 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 
 			
 			//Strategy 3- Main strategy
-			else if (neg_strategy.equals("strategy-3 @ execute task")) { 
+			else if (neg_strategy.equals("strategy-3")) { 
 				
-				/*System.out.println("seller: strategy - 3\n----------------------------");
+				System.out.println("seller: strategy - 3\n----------------------------");
 				
  				//generate the offers using the model strategy
-				generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				Offer generatedOffer = strategy_call.callForStrategy(this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory, numberOfRounds, currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
 				
-				System.out.println("generated offer = "+generatedOffer.getOfferPrice());*/
+				System.out.println("generated offer = "+generatedOffer.getOfferPrice());
 	  			 
-				acceptable_price =  order.getLimit();			
+				acceptable_price =  (int)generatedOffer.getOfferPrice();			
 				 System.out.println(acceptable_price); 
 				 
-			}  
-			
+			}
+			 	
 			System.out.println("S: acceptable price= "+ acceptable_price);		
 
 
 			//set the buyer current offer as the previous offer of the buyer
-			this.setSellerPreviousOffer(acceptable_price, this.currentTime, currentRound);
+			//this.setSellerPreviousOffer(acceptable_price, this.currentTime, currentRound);
 		
 			// Extract order data.
 			int price = goal.getProposal();
@@ -542,7 +542,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	 */
 	public void setacceptablePrice(Order order, String name, int price) {
 		if (order.getName().equals(name)) {
-			offerHistory.add(new Offer(price, new Date(), currentRound));
+			offerHistory.add(new Offer(price, new Date(), (currentRound-1)));
 		}
 		for (int i = 0; i < offerHistory.size(); i++) {
 			//System.out.println("Offer from buyer" + offerHistory.get(i).getOfferPrice());

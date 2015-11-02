@@ -213,7 +213,7 @@ public class BuyerBDI implements INegotiationAgent {
 					crl.resultAvailable(new Tuple2<IBuyItemService, Integer>(seller, result));
 					//System.out.println("@BuyerBDI: Seller's make proposal = "+ result);
 					//System.out.println("@BuyerBDI: Seller's round = "+ (currentRound-1)+"\n===========Buyer got the seller's proposall=====================\n");
-					offerHistory.add(new Offer(result,currentTime,(currentRound-1)));
+					offerHistory.add(new Offer(result,currentTime,(currentRound)));
 				}
 						
 				public void exceptionOccurred(Exception exception)
@@ -224,7 +224,7 @@ public class BuyerBDI implements INegotiationAgent {
 			});
 		}//end of for loop
 		
-		//===============calculate the next offer by the seller=====================================
+		//===============calculate the next offer for the seller=====================================
 		
 		// Sort results by price.
 		@SuppressWarnings("unchecked")
