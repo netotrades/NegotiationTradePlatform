@@ -1,7 +1,9 @@
-package trading.strategy;
+package trading.strategy; 
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import org.apache.fop.fo.pagination.Root;
 
 /**
  *  All the possible calculations are done in this calculator class. 
@@ -548,4 +550,219 @@ public class Calculator {
 		//System.out.println();
 		return value;
 	}
+	
+	/**
+	 *  Generate pretended deadline.
+	 *  @param detReg: detection Region.    
+	 *  @param numberOfRows: total number of rows. 
+	 *  @param numberOfColumns: total number of columns.
+	 *  @param newOffer: new offer. 
+	 *  @return pretenededDeadline: deadline 
+	 */
+	public Date GeneratePretendedDeadline(DetectionRegion detReg, int numberOfRows, int numberOfColumns, Date deadline){
+		
+		//estimated deadline of the opponent
+		Date estimatedDeadline = null;
+		Date pretendedDeadline = null; 
+		double initialRisk = 0.0;
+		Date currentTime = new Date();
+		 
+		//get the estimated deadline of the opponent
+		estimatedDeadline = this.opponentEstimatedDeadline(detReg, numberOfRows, numberOfColumns, currentTime);
+		System.out.println("estimated deadline of the opponent= "+ estimatedDeadline);
+		
+		//calculate the initial risk
+		initialRisk = this.calculateRisk(estimatedDeadline, deadline, currentTime);
+		 
+		//if risk cannot be calculated
+		if(initialRisk == 1.0){
+			
+			//set pretended deadline as the original deadline
+			pretendedDeadline = deadline;
+			System.out.println("Initial risk = "+initialRisk+" , pretended deadline = "+pretendedDeadline);
+		}
+		//if the deadline of the opponent is higher- disadvantage
+		else if(initialRisk > 0){	
+			
+			for(double risk = 0.1 ; risk < initialRisk; risk+=0.1){
+				System.out.println("\n nw risk is taken as "+risk);
+				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
+				
+				if(calculatedPret_Deadline!= null && calculatedPret_Deadline.getTime() > currentTime.getTime() && calculatedPret_Deadline.getTime()<= estimatedDeadline.getTime() && calculatedPret_Deadline.getTime() <= deadline.getTime() ){
+					pretendedDeadline = calculatedPret_Deadline;
+					break;
+				}
+			}//end of for loop
+			
+			if(pretendedDeadline == null){
+				pretendedDeadline = deadline;
+			}
+		}
+		//if the deadline of the opponent is lower or equal to zero- advantage
+		else{
+			
+			for(double risk = 0.1 ; risk < 1; risk+=0.1){
+				
+				System.out.println("\n nw risk is taken as "+risk);
+				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
+				
+				if(calculatedPret_Deadline!= null && calculatedPret_Deadline.getTime() > currentTime.getTime() && calculatedPret_Deadline.getTime()<= estimatedDeadline.getTime() && calculatedPret_Deadline.getTime() <= deadline.getTime() ){
+					pretendedDeadline = calculatedPret_Deadline;
+					break;
+				}
+			}//end of for loop
+			
+			if(pretendedDeadline == null){
+				pretendedDeadline = estimatedDeadline;
+			}
+		}
+		 
+		return pretendedDeadline;
+	}
+	
+	/**
+	 *  get opponent estimated deadline.
+	 *  @param detReg: detection Region.    
+	 *  @param numberOfRows: total number of rows. 
+	 *  @param numberOfColumns: total number of columns. 
+	 *  @return pretenededDeadline: deadline 
+	 */
+	public Date opponentEstimatedDeadline(DetectionRegion detReg, int numberOfRows, int numberOfColumns, Date currentTime){
+		
+		double maxProbability = 0.0;
+		Date estimatedDeadlineOfOpponent = null;
+		
+		for(int i = 0; i < numberOfRows; i++){
+			for(int j = 0; j < numberOfColumns; j++){
+				if((detReg.getCells()[i][j].getProbability() > maxProbability) && !detReg.getCells()[i][j].isExpired() && (detReg.getCells()[i][j].getCellUpperDeadline().getTime()>currentTime.getTime())){
+					maxProbability = detReg.getCells()[i][j].getProbability();
+					estimatedDeadlineOfOpponent = detReg.getCells()[i][j].getCellDeadline();
+				}//end of if				
+			}//end of inner for loop
+		}//end of outer for loop
+		
+		return estimatedDeadlineOfOpponent;
+	}
+	
+	/**
+	 *  calculate the risk.
+	 *  @param opponentDeadline: opponent deadline.    
+	 *  @param deadline: deadline.  
+	 *  @return risk: risk of dealing with the opponent 
+	 */	
+	 public double calculateRisk(Date opponentDeadline, Date deadline, Date currentTime){
+		 double risk; 
+		 
+		 //risk can be calculated
+		 if((opponentDeadline.getTime() > currentTime.getTime()) && (deadline.getTime() > currentTime.getTime())&& (deadline.getTime()>0) ){
+			 
+				risk=((opponentDeadline.getTime() - deadline.getTime())* (currentTime.getTime()))/(((0.5*(opponentDeadline.getTime()+deadline.getTime()))-currentTime.getTime())* deadline.getTime());
+				System.out.println("calculated initial risk = " + risk);
+		 }
+		else{ 
+			risk = 1.0;
+		}
+		 
+		 return risk;
+	 }
+	 
+	 /**
+		 *  calculate the pretendedDeadline for given risk.
+		 *  @param opponentDeadline: opponent deadline.    
+		 *  @param deadline: deadline.  
+		 *  @return risk: risk of dealing with the opponent 
+		 */	
+	public Date calculatePretendedDeadlineForGivenRisk(Date opponentDeadline, Date currentTime, double risk){
+		Date pretendedDeadline = null;
+		double a = 0,b =0 ,c=0 ;
+		
+		// calculate a
+		a = (0.5 * risk);
+		System.out.println("a = "+a);
+		
+		//calculate b
+		b = ((0.5* risk * opponentDeadline.getTime()) + ((1+risk)* currentTime.getTime()));
+		System.out.println("b = "+b);
+		
+		//calculate c
+		c= opponentDeadline.getTime()* (-1.0);
+		System.out.println("c = "+c);
+				
+		ArrayList<Double> roots = this.calculateTheRoots(a, b, c); 
+		
+		//if there are roots
+		if(roots.get(0) != null && roots.get(1) != null){
+			
+			//if the 1st root has a positive value which is higher than the current time
+			if( roots.get(0)> currentTime.getTime() && roots.get(1)> currentTime.getTime()){
+				
+				if(roots.get(0) < opponentDeadline.getTime() && roots.get(1) < opponentDeadline.getTime()){
+					if(roots.get(0) >=  roots.get(1)){
+						pretendedDeadline = new Date(roots.get(0).longValue());	
+					}
+					else{
+						pretendedDeadline = new Date(roots.get(1).longValue());
+					}
+					
+				}
+				else if(roots.get(0) < opponentDeadline.getTime()){
+					pretendedDeadline = new Date(roots.get(0).longValue());
+				}
+				else{
+					pretendedDeadline = new Date(roots.get(1).longValue());
+				}
+			}			
+			//if the 1st root has a positive value which is higher than the current time
+			else if( roots.get(0)> currentTime.getTime() && roots.get(1)<= currentTime.getTime()){
+				pretendedDeadline = new Date(roots.get(0).longValue());
+			}
+			//if the 1st root has a positive value which is higher than the current time
+			else if( roots.get(1)> currentTime.getTime() && roots.get(0)<= currentTime.getTime()){
+				pretendedDeadline = new Date(roots.get(1).longValue());
+			}
+			else{
+				pretendedDeadline = null;
+			}
+			
+		}
+		else{
+			pretendedDeadline = null;
+		}
+		
+		return pretendedDeadline;
+	}
+	
+	/**
+	 *  calculate the roots for given quadratic equation.
+	 *  @param a: coefficient of X^2.    
+	 *  @param b: coefficient of x.  
+	 *  @return c: coefficient of x^0 
+	 */
+	public ArrayList<Double> calculateTheRoots(double a, double b, double c){
+		
+		//return array list 
+		ArrayList<Double> roots = new ArrayList<Double>(2);
+		
+		//calculate delta value
+		double delta = (Math.pow(a, 2) -(4 * a* c));
+		
+		if(delta>= 0 && a != 0){
+			//calculate roots
+			double root1 = ((-1*b) - Math.pow(Math.abs(delta), (1/2)))/(2*a);
+			double root2 = ((-1*b) + Math.pow(Math.abs(delta), (1/2)))/(2*a);
+			
+			//add roots to the return array list
+			roots.add(0, root1);
+			roots.add(1, root2);
+		}
+		else{
+			//add null values to the return array list
+			roots.add(0, null);
+			roots.add(1, null);
+			System.out.println("Warning: Complex roots are available for the given quadratic eqation!.......");
+		}
+		
+		return roots;
+	}
+	
 }
