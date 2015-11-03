@@ -28,19 +28,25 @@ public class RegressionAnalyser {
 					//System.out.println("\n cell["+i+", "+j+"]\n------------");
 					
 					//calculate the fitted offer of the cell[i,j]
-					double offer = calculator.GenerateFittedOffer(detReg, i, j, offerHistory);
+					ArrayList<Double> fittedOfferDoubleValueArrayList = calculator.GenerateFittedOffer(detReg, i, j, offerHistory);
 					
 					//System.out.println("\nCalculated fitted offer = "+ offer);
 					
-					//create a offer object from the calculated fitted offer
-					Offer offerObj = new Offer(offer, offerHistory.get(offerHistory.size()-1).getOfferTime(), (offerHistory.size()-1));
+					ArrayList<Offer> fittedOfferArrayList = new ArrayList<Offer>();
+					
+					for(int fittedOfferAt = 0 ; fittedOfferAt < offerHistory.size(); fittedOfferAt++){
+						//create a offer object from the calculated fitted offer
+						Offer offerObj = new Offer(fittedOfferDoubleValueArrayList.get(fittedOfferAt), offerHistory.get(offerHistory.size()-1).getOfferTime(), (offerHistory.size()-1));
+						fittedOfferArrayList.add(fittedOfferAt, offerObj);
+					}
 					
 					//System.out.println("create offer object successfully");
 					//System.out.println("offer history array size = "+ offerHistory.size()); 
 					//System.out.println("fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size()); 
 						
 					//add the fitted offer to the cell 				
-					detReg.getCells()[i][j].setNewFittedOffer(offerObj);
+					//detReg.getCells()[i][j].setNewFittedOffer(offerObj);
+					detReg.getCells()[i][j].setFittedOffers(fittedOfferArrayList);
 					
 					//System.out.println(" New fitted offer array size = "+ detReg.getCells()[i][j].getFittedOffers().size());
 					//System.out.println("added offer = "+ detReg.getCells()[i][j].getFittedOffers().get(detReg.getCells()[i][j].getFittedOffers().size()-1).getOfferPrice());

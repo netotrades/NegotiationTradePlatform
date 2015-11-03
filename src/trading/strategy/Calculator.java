@@ -45,14 +45,15 @@ public class Calculator {
 	 *  @param offerHistory: offerHistory of the opponent.
 	 *  @return fittedOffer: return fitted offer for the given cell. 
 	 */
-	public double GenerateFittedOffer(DetectionRegion detReg, int row, int col, ArrayList<Offer> offerHistory) {
+	public ArrayList<Double> GenerateFittedOffer(DetectionRegion detReg, int row, int col, ArrayList<Offer> offerHistory) {
+		
+		ArrayList<Double> fittedOfferList = new ArrayList<Double>();	
 		
 		//initialize the fitted offer
 		double fittedOffer = 0.0;
 		
 		//initialize parameters
-		double p0 = 0 ; double pix = 0 ;
-		long t = 0; long tix =0;
+		double p0 = 0 ; double pix = 0 ;long tix =0;		 
 		
 		if(offerHistory.size() > 0){
 			
@@ -60,8 +61,7 @@ public class Calculator {
 			pix = detReg.getCells()[row][col].getCellReservePrice();
 			tix = detReg.getCells()[row][col].getCellDeadline().getTime();
 			
-			// calculate the value 'b' 
-			double b = this.GenerateBValue(detReg, row, col, offerHistory);
+			
 			
 			//System.out.println("\np0 = " + p0);
 			//System.out.println("pix = " + pix);
@@ -70,26 +70,36 @@ public class Calculator {
 			
 			if(offerHistory.size()== 1){
 				fittedOffer = p0;
+				fittedOfferList.add(0,fittedOffer);
 			}
 			//value b and fitted offer is calculated 2nd step onwards
-			else{			
-				
-				t = offerHistory.get(offerHistory.size()-1).getOfferTime().getTime();				
-
-				//System.out.println("t = " + t);			
-				
-				//calculate the fitted offer 
-				if( tix != 0 && tix != Double.POSITIVE_INFINITY && tix != Double.NEGATIVE_INFINITY){
-					fittedOffer = (double)(p0 + ((pix - p0)* (Math.pow(Math.abs((t * 1.0 / tix)) , b))));
+			else{	
+				int fittedOfferAtRound;
+ 			
+				for(fittedOfferAtRound = 0; fittedOfferAtRound < offerHistory.size(); fittedOfferAtRound++){
+					
+					//calculate the fitted offer 
+					if( tix != 0 && tix != Double.POSITIVE_INFINITY && tix != Double.NEGATIVE_INFINITY){
+						// calculate the value 'b' 
+						double b = this.GenerateBValue(detReg, row, col, offerHistory);
+						long t = offerHistory.get(offerHistory.size()-1).getOfferTime().getTime();
+						
+						fittedOffer = (double)(p0 + ((pix - p0)* (Math.pow(Math.abs((t * 1.0 / tix)) , b))));
+					}
+					else{
+						fittedOffer = p0;
+					}
+					
+					fittedOfferList.add(fittedOfferAtRound, fittedOffer);
 				}
-				else{
-					fittedOffer = p0;
-				}					
+									
 			}//end of else
-		}//end of if clause		
+		}//end of if clause	
+		
+			
 			
 		//return calculated fitted offer 
-		return fittedOffer;
+		return fittedOfferList;
 	}
 	
 	/**
