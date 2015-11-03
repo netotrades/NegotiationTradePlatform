@@ -96,7 +96,7 @@ public class NegotiationReport
 	public String toString()
 	{
 		//return "NegotiationReport("+order+", "+details+")";
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy.'-'HH:mm:ss ': '");
-		return sdf.format(new Date(time))+order+" - "+details;
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy.'-'HH:mm:ss', '");
+		return sdf.format(new Date(time))+order+", "+details;
 	}
 }
