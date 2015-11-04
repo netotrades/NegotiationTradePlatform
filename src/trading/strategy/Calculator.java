@@ -3,8 +3,6 @@ package trading.strategy;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.apache.fop.fo.pagination.Root;
-
 /**
  *  All the possible calculations are done in this calculator class. 
  */
@@ -241,7 +239,7 @@ public class Calculator {
 		double sumUP = 0.0;	double sumDown1 = 0.0; 	double sumDown2 = 0.0;	double foundGamma = 1.0;
 		double pi = 0.0; double piHat=0.0;  
 		
-		//cell should have fitted offers corresponds to each histori
+		//cell should have fitted offers corresponds to each history
 		if(detReg.getCells()[row][col].getFittedOffers().size() == offerHistory.size()){ 
 			
 			//gamma can only calculate if the offer size is greater than 1
