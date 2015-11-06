@@ -31,7 +31,7 @@ public class StrategyCall {
 	/**
 	 *  Strategy-3 execution method 
 	 */
-	public Offer callForStrategy3(DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int numberOfRounds, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
+	public Offer callForStrategy3(Date currentTime,DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
 		
 		/*//To print the agent in print statements
 		String agent="";
@@ -115,7 +115,7 @@ public class StrategyCall {
 		//System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
 		
 		
-		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns, prevOffer,
+		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns, prevOffer,
 				stepSize, isBuyer, offerHistory);
 		
 		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");
@@ -126,7 +126,7 @@ public class StrategyCall {
 	/**
 	 *  Strategy-3 execution method 
 	 */
-	public Offer callForStrategy2(DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int numberOfRounds, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
+	public Offer callForStrategy2(Date currentTime,DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
 		
 		//To print the agent in print statements
 		String agent="";
@@ -167,14 +167,14 @@ public class StrategyCall {
 		System.out.println(agent+"\nNow Offer History Length= "+offerHistory.size()+" , current Round = "+ currentRound);*/
 		
 		
-		System.out.println("\n"+agent+"=====================change reserve price=========================" );
+		//System.out.println("\n"+agent+"=====================change reserve price=========================" );
 		
 		Date pretendedDeadline = calculator.GeneratePretendedDeadline(detectionRegion, numberOfRows, numberOfColumns, deadline);
-		System.out.println("pretened deadline = "+ pretendedDeadline);
+		//System.out.println("pretened deadline = "+ pretendedDeadline);
 		if(pretendedDeadline == deadline){
-			System.out.println("calculated pretended deadline as same as the real deadline = " + deadline);
+			//System.out.println("calculated pretended deadline as same as the real deadline = " + deadline);
 		}else{
-			System.out.println("pretended deadline is not equal as real deadline = "+ deadline);
+			//System.out.println("pretended deadline is not equal as real deadline = "+ deadline);
 		}
 		
 		///*System.out.println("\n"+agent+"=====================Before the regression method execution=========================" );*/			 
@@ -221,7 +221,7 @@ public class StrategyCall {
 		//System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
 		
 		
-		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(detectionRegion, reservePrice, pretendedDeadline, numberOfRows, numberOfColumns, prevOffer,
+		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, pretendedDeadline, numberOfRows, numberOfColumns, prevOffer,
 				stepSize, isBuyer, offerHistory);
 		
 		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");

@@ -393,7 +393,7 @@ public class Calculator {
 	 *  @param offerHistory: offerHistory of the opponent. 
 	 *  @return nextOffer: counter offer for the opponent.  
 	 */
-	public Offer GenerateNextOffer(DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
+	public Offer GenerateNextOffer(Date currentTime, DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
 			int numberOfColumns, Offer prevOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory) {
 
 		double base = 0.0; 	double value = 0.0; double BetaHat = 0.0; 	double Sum = 0.0; double BetaBar = 0.0;
@@ -401,9 +401,10 @@ public class Calculator {
 		 
 		
 		Offer nextOffer;
-		
-		if(offerHistory.size()==1 && isBuyer){ 
-			nextOffer = new Offer(prevOffer.getOfferPrice(), new Date(),0);
+		//buyer's oth round
+		if(offerHistory.size()==1 && isBuyer){
+			//System.out.println("Buyer's history size is 1");
+			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime,0);
 		}
 		else if(offerHistory.size()>0 ){
 			
@@ -423,7 +424,8 @@ public class Calculator {
 						//calculate beta hat value
 						BetaHat = this.logOfBase(base, value); //System.out.println("BetaHat"+BetaHat);
 						
-	 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat)); //System.out.println("Sum"+Sum);
+	 					Sum += (double)(detReg.getCells()[i][j].getProbability() / (1 + BetaHat)); //
+	 					//System.out.println("Sum"+Sum);
 					} 
 					//System.out.println();
 				}//end of inner for loop
@@ -433,14 +435,27 @@ public class Calculator {
 			//calculate the beta bar value
 			if(Sum != 0 && Sum!= Double.POSITIVE_INFINITY && Sum != Double.NEGATIVE_INFINITY){
 				BetaBar = (double)((1 / Sum) - 1);
+				//System.out.println("beta bar value = "+BetaBar);
+				BetaBar= Math.abs(BetaBar);
+				//BetaBar = 0.8;
+				
 			}
 			else{
 				BetaBar = 1.0;
 			}
 			
+			String agent="";
+			if(isBuyer){
+				agent = "Buyer: ";
+			}
+			else{
+				agent = "Seller: ";
+			} 
+			//System.out.println(agent+Math.abs(BetaBar)); 
+			
 			
 			p0 = prevOffer.getOfferPrice();
-			t = new Date().getTime(); //current time
+			t = currentTime.getTime(); //current time
 			t0 = prevOffer.getOfferTime().getTime();
 			
 			//calculate time ratio
@@ -486,7 +501,7 @@ public class Calculator {
 			//if generated offer is exceed the opponents last offer
 			if(isBuyer && offerPrice >= opponentLastOffer ){
 				//set the opponent last offer as the next offer
-				offerPrice = opponentLastOffer;
+				offerPrice = opponentLastOffer; //System.out.println("sellers last offer is lower than than the buyers generated value");
 			}
 			else if(!isBuyer && offerPrice <= opponentLastOffer){
 				offerPrice = opponentLastOffer;
@@ -494,11 +509,12 @@ public class Calculator {
 			
 			
 			//create offer object
-			nextOffer = new Offer(offerPrice,new Date(t), (prevOffer.getRoundNumber() + 1));
+			nextOffer = new Offer(offerPrice,currentTime, (prevOffer.getRoundNumber() + 1));
+			System.out.println("1:" +nextOffer.getOfferPrice());
 		}
 		else{
-			nextOffer = new Offer(prevOffer.getOfferPrice(),new Date(), 0);
-			//System.out.println("1st offer");
+			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime, 0);
+			System.out.println("2:" +nextOffer.getOfferPrice());
 		} 
 		return nextOffer;
 	}
@@ -577,7 +593,7 @@ public class Calculator {
 		 
 		//get the estimated deadline of the opponent
 		estimatedDeadline = this.opponentEstimatedDeadline(detReg, numberOfRows, numberOfColumns, currentTime);
-		System.out.println("estimated deadline of the opponent= "+ estimatedDeadline);
+		//System.out.println("estimated deadline of the opponent= "+ estimatedDeadline);
 		
 		//calculate the initial risk
 		initialRisk = this.calculateRisk(estimatedDeadline, deadline, currentTime);
@@ -587,13 +603,13 @@ public class Calculator {
 			
 			//set pretended deadline as the original deadline
 			pretendedDeadline = deadline;
-			System.out.println("Initial risk = "+initialRisk+" , pretended deadline = "+pretendedDeadline);
+			//System.out.println("Initial risk = "+initialRisk+" , pretended deadline = "+pretendedDeadline);
 		}
 		//if the deadline of the opponent is higher- disadvantage
 		else if(initialRisk > 0){	
 			
 			for(double risk = 0.1 ; risk < initialRisk; risk+=0.1){
-				System.out.println("\n nw risk is taken as "+risk);
+				//System.out.println("\n nw risk is taken as "+risk);
 				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
 				
 				if(calculatedPret_Deadline!= null && calculatedPret_Deadline.getTime() > currentTime.getTime() && calculatedPret_Deadline.getTime()<= estimatedDeadline.getTime() && calculatedPret_Deadline.getTime() <= deadline.getTime() ){
@@ -611,7 +627,7 @@ public class Calculator {
 			
 			for(double risk = 0.1 ; risk < 1; risk+=0.1){
 				
-				System.out.println("\n nw risk is taken as "+risk);
+				//System.out.println("\n nw risk is taken as "+risk);
 				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
 				
 				if(calculatedPret_Deadline!= null && calculatedPret_Deadline.getTime() > currentTime.getTime() && calculatedPret_Deadline.getTime()<= estimatedDeadline.getTime() && calculatedPret_Deadline.getTime() <= deadline.getTime() ){
@@ -665,7 +681,7 @@ public class Calculator {
 		 if((opponentDeadline.getTime() > currentTime.getTime()) && (deadline.getTime() > currentTime.getTime())&& (deadline.getTime()>0) ){
 			 
 				risk=((opponentDeadline.getTime() - deadline.getTime())* (currentTime.getTime()))/(((0.5*(opponentDeadline.getTime()+deadline.getTime()))-currentTime.getTime())* deadline.getTime());
-				System.out.println("calculated initial risk = " + risk);
+				//System.out.println("calculated initial risk = " + risk);
 		 }
 		else{ 
 			risk = 1.0;
@@ -686,15 +702,15 @@ public class Calculator {
 		
 		// calculate a
 		a = (0.5 * risk);
-		System.out.println("a = "+a);
+		//System.out.println("a = "+a);
 		
 		//calculate b
 		b = ((0.5* risk * opponentDeadline.getTime()) + ((1+risk)* currentTime.getTime()));
-		System.out.println("b = "+b);
+		//System.out.println("b = "+b);
 		
 		//calculate c
 		c= opponentDeadline.getTime()* (-1.0);
-		System.out.println("c = "+c);
+		//System.out.println("c = "+c);
 				
 		ArrayList<Double> roots = this.calculateTheRoots(a, b, c); 
 		
@@ -767,7 +783,7 @@ public class Calculator {
 			//add null values to the return array list
 			roots.add(0, null);
 			roots.add(1, null);
-			System.out.println("Warning: Complex roots are available for the given quadratic eqation!.......");
+			//System.out.println("Warning: Complex roots are available for the given quadratic eqation!.......");
 		}
 		
 		return roots;
