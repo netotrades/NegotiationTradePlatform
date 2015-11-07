@@ -716,7 +716,7 @@ public class Calculator {
 		//if the deadline of the opponent is higher- disadvantage
 		else if(initialRisk > 0){	
 			
-			for(double risk = 0.1 ; risk < initialRisk; risk+=0.1){
+			for(double risk = 0.1 ; risk <= initialRisk; risk+=0.1){
 				//System.out.println("\n nw risk is taken as "+risk);
 				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
 				
@@ -733,7 +733,7 @@ public class Calculator {
 		//if the deadline of the opponent is lower or equal to zero- advantage
 		else{
 			
-			for(double risk = 0.1 ; risk < 1; risk+=0.1){
+			for(double risk = 0.1 ; risk <= 1; risk+=0.1){
 				
 				//System.out.println("\n nw risk is taken as "+risk);
 				Date calculatedPret_Deadline = this.calculatePretendedDeadlineForGivenRisk(estimatedDeadline, currentTime, risk);
