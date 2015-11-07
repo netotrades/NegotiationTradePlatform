@@ -34,6 +34,7 @@ import trading.INegotiationGoal;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order;
+import trading.strategy.Calculator;
 import trading.strategy.DetectionRegion;
 import trading.strategy.Offer;
 import trading.strategy.StrategyCall;
@@ -83,6 +84,10 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	
 	private final double betaValue = 0.8;
 	
+	private ArrayList<Double> utilityPriceArray = new ArrayList<Double>();
+	private ArrayList<Double> utilityTimeArray = new ArrayList<Double>();
+	private double averagePriceUtility = 0.0;
+	private double averageTimeUtility = 0.0;
 	
 	/**
 	 *  The agent body.
@@ -294,7 +299,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		String neg_strategy = order.getNegotiationStrategy();
 		
 		//initialize the acceptable price
-		int acceptable_price = 0; 
+		int acceptable_price = 0; Offer generatedOffer = new Offer();
 		
 		// Use most urgent order for preparing proposal.
 
@@ -311,7 +316,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				double price_span = order.getLimit() - order.getStartPrice();
 				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();*/
 				
-				Offer generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.sellerPreviousOffer, false, betaValue);
+				generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,new Offer(this.historyPrice, this.currentTime, 0),this.sellerPreviousOffer, false, betaValue);
 				
 				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
 				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
@@ -324,7 +329,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				//System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 2  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");
 				
 				//generate the offers using the model strategy
-				Offer generatedOffer = strategy_call.callForStrategy2(this.currentTime,this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory,currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				generatedOffer = strategy_call.callForStrategy2(this.currentTime,this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory,currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
 				
 				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
 				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
@@ -338,7 +343,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				//System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 3  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");
 				
 				//generate the offers using the model strategy
-				Offer generatedOffer = strategy_call.callForStrategy3(this.currentTime,this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory,currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
+				generatedOffer = strategy_call.callForStrategy3(this.currentTime,this.detectionRegion, order.getStartPrice()*1.0, order.getLimit()* 1.0, order.getDeadline(), offerHistory,currentRound, this.numberOfRows, this.numberOfColumns, this.sellerPreviousOffer, false);
 				
 				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
 				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
@@ -349,6 +354,9 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			//System.out.println("Seller: @ round= "+this.currentRound+" , offer = "+ acceptable_price);
 			//set the buyer current offer as the previous offer of the buyer
 			this.setSellerPreviousOffer(acceptable_price, this.currentTime, this.currentRound);	
+			
+			this.utilityPriceArray.add(generatedOffer.getUtilityPriceValue());
+			this.utilityTimeArray.add(generatedOffer.getUtilityTimeValue());
 			 
 			agent.getLogger().info(agent.getAgentName()+" proposed: " + acceptable_price);
 			
@@ -437,7 +445,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				double price_span = order.getLimit() - order.getStartPrice();
 				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();*/
 				
-				Offer generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.sellerPreviousOffer, false, betaValue);
+				Offer generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,new Offer(this.historyPrice, this.currentTime, 0),this.sellerPreviousOffer, false, betaValue);
 				
 				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
 				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
@@ -484,6 +492,13 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			//System.out.println("S: goal porposal= "+price);
 			
 			if (price >= acceptable_price) {
+				
+				this.averagePriceUtility = (new Calculator()).calculateAverageUtility(utilityPriceArray);
+				this.averageTimeUtility = (new Calculator()).calculateAverageUtility(utilityTimeArray);
+				
+				System.out.println("Seller: average price utility = "+ this.averagePriceUtility );
+				System.out.println("Seller: average time utility = "+ this.averageTimeUtility );
+				
 				order.setState(Order.DONE);
 				order.setExecutionPrice(price);
 				order.setExecutionDate(new Date(getTime()));

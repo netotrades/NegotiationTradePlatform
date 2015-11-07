@@ -9,6 +9,8 @@ public class Offer {
 	private double offerPrice;
 	private Date offerTime;
 	private int roundNumber;
+	private double utilityPriceValue = 0.0;
+	private double utilityTimeValue = 0.0;
 	
 	/**
 	 *  constructor 1
@@ -20,10 +22,12 @@ public class Offer {
 	}
 	
 	/**
-	 *  constructor 2 
+	 *  constructor 2
 	 */
-	public Offer(){}
-	
+	public Offer(){
+	 
+	}
+		
 	
 	/**
 	 *  get offer price. 
@@ -66,5 +70,39 @@ public class Offer {
 	public void setRoundNumber(int roundNumber) {
 		this.roundNumber = roundNumber;
 	}
+
+	/**
+	 * @return
+	 */
+	public double getUtilityPriceValue() {
+		return utilityPriceValue;
+	}
+
+	/**
+	 * @param utilityPriceValue
+	 */
+	public void setUtilityPriceValue(double utilityPriceValue) {
+		this.utilityPriceValue = utilityPriceValue;
+	}
+
+	/**
+	 * @return
+	 */
+	public double getUtilityTimeValue() {
+		return utilityTimeValue;
+	}
+
+	/**
+	 * @param utilityTimeValue
+	 */
+	public void setUtilityTimeValue(double utilityTimeValue) {
+		this.utilityTimeValue = utilityTimeValue;
+	}
+
+ 
+ 
+ 
+	
+	
 		
 }

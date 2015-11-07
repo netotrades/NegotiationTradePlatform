@@ -29,9 +29,9 @@ public class StrategyCall {
 	/**
 	 *  Strategy-1 execution method 
 	 */
-	public Offer callForStrategy1(Date currentTime, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, Offer prevOffer, boolean isBuyer, Double betaValue ) {
+	public Offer callForStrategy1(Date currentTime, double reservePrice, Date deadline, ArrayList<Offer> offerHistory,Offer startingOffer, Offer prevOffer, boolean isBuyer, Double betaValue ) {
 			
-		Offer nextOffer = this.calculator.GenerateNextOfferWithoutLearning(currentTime, reservePrice, deadline, prevOffer, isBuyer, offerHistory, betaValue);
+		Offer nextOffer = this.calculator.GenerateNextOfferWithoutLearning(currentTime, reservePrice, deadline, startingOffer, prevOffer, isBuyer, offerHistory, betaValue);
 		 
 		return nextOffer;
 	}	
@@ -123,7 +123,7 @@ public class StrategyCall {
 		//System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
 		
 		
-		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns, prevOffer,
+		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, deadline, numberOfRows, numberOfColumns,new Offer(startPrice, currentTime, 0), prevOffer,
 				stepSize, isBuyer, offerHistory);
 		
 		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");
@@ -229,7 +229,7 @@ public class StrategyCall {
 		//System.out.println(agent+"\n================end of the printing concessionpoints==============\n");
 		
 		
-		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, pretendedDeadline, numberOfRows, numberOfColumns, prevOffer,
+		Offer nextOffer = ConcessionStrategy.GenerateNextOffer(currentTime,detectionRegion, reservePrice, pretendedDeadline, numberOfRows, numberOfColumns,new Offer(startPrice, currentTime,0), prevOffer,
 				stepSize, isBuyer, offerHistory);
 		
 		//System.out.println(agent+"||||||||||||||||||||||||||||||||THE END OF STRATEGY CALL||||||||||||||||||||||||||\n");

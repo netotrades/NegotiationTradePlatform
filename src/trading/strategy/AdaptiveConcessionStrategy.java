@@ -385,7 +385,7 @@ public class AdaptiveConcessionStrategy {
 	/**
 	 *  Generate next offer. 
 	 */
-	public Offer GenerateNextOffer(Date currentTime, DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows, int numberOfColumns, Offer newOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory){
-		return calculator.GenerateNextOffer(currentTime,detReg, reservePrice,deadline, numberOfRows, numberOfColumns, newOffer, stepSize, isBuyer, offerHistory);
+	public Offer GenerateNextOffer(Date currentTime, DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows, int numberOfColumns,Offer startingOffer, Offer newOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory){
+		return calculator.GenerateNextOffer(currentTime,detReg, reservePrice,deadline, numberOfRows, numberOfColumns,startingOffer, newOffer, stepSize, isBuyer, offerHistory);
 	}
 }

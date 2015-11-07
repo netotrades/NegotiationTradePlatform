@@ -34,6 +34,7 @@ import trading.common.ExcelWriter;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order; 
+import trading.strategy.Calculator;
 import trading.strategy.DetectionRegion;
 import trading.strategy.Offer;
 import trading.strategy.StrategyCall;
@@ -82,7 +83,11 @@ public class BuyerBDI implements INegotiationAgent {
 	//initialize the default max number of rounds to 15
 	//private final int numberOfRounds = 5;
 	private final double betaValue = 0.8;
- 
+	
+	private ArrayList<Double> utilityPriceArray = new ArrayList<Double>();
+	private ArrayList<Double> utilityTimeArray = new ArrayList<Double>();
+	private double averagePriceUtility = 0.0;
+	private double averageTimeUtility = 0.0;
 	
 	/**
 	 *  The agent body.
@@ -254,10 +259,10 @@ public class BuyerBDI implements INegotiationAgent {
 			//System.out.println("\n+++++++++++++++++++++++++++++\nBuyer: STRategy - 2 @ Purchase item\n+++++++++++++++++++++++++\n"); 
 			
 			//generate the offers using the model strategy
-			generatedOffer =  strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.buyerPreviousOffer, true, betaValue);
+			generatedOffer =  strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,new Offer(this.historyPrice, this.currentTime, 0),this.buyerPreviousOffer, true, betaValue);
 			//System.out.println("generated offer = "+generatedOffer.getOfferPrice());
   			 
-			acceptable_price =  (int) generatedOffer.getOfferPrice(); 
+			acceptable_price =  (int) generatedOffer.getOfferPrice();			
 			
 		}
 		
@@ -283,6 +288,9 @@ public class BuyerBDI implements INegotiationAgent {
 			acceptable_price =  (int) generatedOffer.getOfferPrice();
 		} 
 		
+		this.utilityPriceArray.add(generatedOffer.getUtilityPriceValue());
+		this.utilityTimeArray.add(generatedOffer.getUtilityTimeValue());
+		
 		//System.out.println("Buyer: @ round= "+this.currentRound+" , offer = "+ acceptable_price);
 		this.setBuyerPreviousOffer(acceptable_price, generatedOffer.getOfferTime(), generatedOffer.getRoundNumber());
 
@@ -294,6 +302,12 @@ public class BuyerBDI implements INegotiationAgent {
 		if(proposals.length>0 && proposals[0].getSecondEntity().intValue()<= acceptable_price)
 		{
 			proposals[0].getFirstEntity().acceptProposal(order.getName(), proposals[0].getSecondEntity().intValue()).get();
+			
+			this.averagePriceUtility = (new Calculator()).calculateAverageUtility(utilityPriceArray);
+			this.averageTimeUtility = (new Calculator()).calculateAverageUtility(utilityTimeArray);
+			
+			System.out.println("Buyer: average price utility = "+ this.averagePriceUtility );
+			System.out.println("Buyer: average time utility = "+ this.averageTimeUtility );
 			
 			generateNegotiationReport(order, proposals, acceptable_price);
 			// If contract-net succeeds, store result in order object.

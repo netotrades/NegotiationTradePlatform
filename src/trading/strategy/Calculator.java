@@ -8,6 +8,8 @@ import java.util.Date;
  */
 public class Calculator {
 	
+	UtilityCalculation utility = new UtilityCalculation();
+	
 	/**
 	 *  Calculate average of the offers in the array list.
 	 *  @param offers: array list of offers. 
@@ -394,10 +396,10 @@ public class Calculator {
 	 *  @return nextOffer: counter offer for the opponent.  
 	 */
 	public Offer GenerateNextOffer(Date currentTime, DetectionRegion detReg, double reservePrice, Date deadline, int numberOfRows,
-			int numberOfColumns, Offer prevOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory) {
+			int numberOfColumns, Offer startingOffer,Offer prevOffer, long stepSize, boolean isBuyer, ArrayList<Offer> offerHistory) {
 
 		double base = 0.0; 	double value = 0.0; double BetaHat = 0.0; 	double Sum = 0.0; double BetaBar = 0.0;
-		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; 
+		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; double timeUtility = 0.0; double priceUtility = 0.0;
 		 
 		
 		Offer nextOffer;
@@ -465,20 +467,24 @@ public class Calculator {
 			else{
 				timeRatio = 0.0;
 			}
+			
 			/*System.out.println("sum = "+ Sum);
 			System.out.println("betabar "+BetaBar);
 			System.out.println("time ratio "+timeRatio);
 			System.out.println("power "+(Math.pow(timeRatio, BetaBar)));
 			System.out.println("po + "+((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));*/
+			
 			//calculate the next offer
 			if(BetaBar!= Double.POSITIVE_INFINITY && BetaBar != Double.NEGATIVE_INFINITY){
 				if(timeRatio!= Double.POSITIVE_INFINITY && timeRatio != Double.NEGATIVE_INFINITY){
 					 if((p0 < reservePrice) && isBuyer){
 						offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
+						timeUtility = this.utility.calculateTimeUtility(currentTime, deadline, BetaBar);
 						//System.out.println("Buyer offer cal = "+offerPrice);
 					}
 					else if((p0 > reservePrice) && !isBuyer){
 						offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, BetaBar))));
+						timeUtility = this.utility.calculateTimeUtility(currentTime, deadline, BetaBar);
 						//System.out.println("Seller offer cal = "+offerPrice);
 					}
 					else{
@@ -496,6 +502,7 @@ public class Calculator {
 				//System.out.println("error in time beta bar "+BetaBar);
 			} 
 			
+			
 			double opponentLastOffer = offerHistory.get((offerHistory.size()-1)).getOfferPrice();
 			
 			//if generated offer is exceed the opponents last offer
@@ -507,14 +514,18 @@ public class Calculator {
 				offerPrice = opponentLastOffer;
 			}
 			
+			priceUtility = this.utility.calculatePriceUtility(offerPrice, startingOffer.getOfferPrice(), reservePrice);
 			
 			//create offer object
 			nextOffer = new Offer(offerPrice,currentTime, (prevOffer.getRoundNumber() + 1));
-			System.out.println("1:" +nextOffer.getOfferPrice());
+			nextOffer.setUtilityPriceValue(priceUtility);
+			nextOffer.setUtilityTimeValue(timeUtility);
+			
+			//System.out.println("1:" +nextOffer.getOfferPrice());
 		}
 		else{
 			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime, 0);
-			System.out.println("2:" +nextOffer.getOfferPrice());
+			//System.out.println("2:" +nextOffer.getOfferPrice());
 		} 
 		return nextOffer;
 	}
@@ -532,17 +543,16 @@ public class Calculator {
 	 *  @param offerHistory: offerHistory of the opponent. 
 	 *  @return nextOffer: counter offer for the opponent.  
 	 */
-	public Offer GenerateNextOfferWithoutLearning(Date currentTime, double reservePrice, Date deadline, Offer prevOffer,  boolean isBuyer, ArrayList<Offer> offerHistory, double betaValue) {
+	public Offer GenerateNextOfferWithoutLearning(Date currentTime, double reservePrice, Date deadline,Offer startingOffer, Offer prevOffer,  boolean isBuyer, ArrayList<Offer> offerHistory, double betaValue) {
  
 		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; 
-		 
+		double timeUtility =0.0; double priceUtility =0.0;
 		
 		Offer nextOffer;
 		//buyer's oth round
 		if(offerHistory.size()==1 && isBuyer){
-			System.out.println("Buyer's history size is 1");
-			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime,0);
-			
+			//System.out.println("Buyer's history size is 1");
+			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime,0);			
 		}
 		else if(offerHistory.size()>0 ){
 			 
@@ -558,25 +568,35 @@ public class Calculator {
 				timeRatio = 0.0;
 			}
 			
-			System.out.println("isbuyer : "+isBuyer+" time ratio=  "+ timeRatio);
+			//System.out.println("isbuyer : "+isBuyer+" time ratio=  "+ timeRatio);
 			 
 			if(timeRatio!= Double.POSITIVE_INFINITY && timeRatio != Double.NEGATIVE_INFINITY){
 				 if((p0 < reservePrice) && isBuyer){
 					offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, betaValue))));
-					System.out.println("Buyer offer cal = "+offerPrice);
+					/*System.out.println("current Time ="+currentTime);
+					System.out.println("deadline = "+deadline);
+					System.out.println("beta = "+betaValue);*/
+					timeUtility = this.utility.calculateTimeUtility(currentTime, deadline, betaValue);					
+					/*System.out.println("Buyer offer cal = "+offerPrice);
+					System.out.println("time utility = "+ timeUtility);*/
 				}
 				else if((p0 > reservePrice) && !isBuyer){
 					offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, betaValue))));
-					System.out.println("Seller offer cal = "+offerPrice);
+					/*System.out.println("current Time ="+currentTime);
+					System.out.println("deadline = "+deadline);
+					System.out.println("beta = "+betaValue);*/
+					timeUtility = this.utility.calculateTimeUtility(currentTime, deadline, betaValue);
+					/*System.out.println("Seller offer cal = "+offerPrice);
+					System.out.println("time utility = "+ timeUtility);*/
 				}
 				else{
 					offerPrice = reservePrice;
-					System.out.println("p0 exceed the reserve price "+offerPrice);
+					//System.out.println("p0 exceed the reserve price "+offerPrice);
 				}
 			}
 			else{
 				offerPrice = reservePrice;
-				System.out.println("error in time ratio "+timeRatio);
+				//System.out.println("error in time ratio "+timeRatio);
 			}	
 			 
 			double opponentLastOffer = offerHistory.get((offerHistory.size()-1)).getOfferPrice();
@@ -584,20 +604,25 @@ public class Calculator {
 			//if generated offer is exceed the opponents last offer
 			if(isBuyer && offerPrice >= opponentLastOffer ){
 				//set the opponent last offer as the next offer
-				offerPrice = opponentLastOffer; //System.out.println("sellers last offer is lower than than the buyers generated value");
+				offerPrice = opponentLastOffer; 
+				//System.out.println("sellers last offer is lower than than the buyers generated value");
 			}
 			else if(!isBuyer && offerPrice <= opponentLastOffer){
 				offerPrice = opponentLastOffer;
 			}
 			
+			priceUtility = this.utility.calculatePriceUtility(offerPrice,startingOffer.getOfferPrice(), reservePrice);
 			
 			//create offer object
 			nextOffer = new Offer(offerPrice,currentTime, (prevOffer.getRoundNumber() + 1));
-			System.out.println("1:" +nextOffer.getOfferPrice());
+			nextOffer.setUtilityPriceValue(priceUtility);
+			nextOffer.setUtilityTimeValue(timeUtility);
+			
+			//System.out.println("1:" +nextOffer.getOfferPrice());
 		}
 		else{
 			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime, 0);
-			System.out.println("2:" +nextOffer.getOfferPrice());
+			//System.out.println("2:" +nextOffer.getOfferPrice());
 		} 
 		return nextOffer;
 	}
@@ -871,5 +896,25 @@ public class Calculator {
 		
 		return roots;
 	}
+	
+	public double calculateAverageUtility(ArrayList<Double> arraylist){
+		double averageUtility = 0.0, utilitySum =0.0; int positiveUtilitiesNumber = 0;
+		
+		for(int i = 1; i< arraylist.size(); i++){
+			 if(arraylist.get(i)!= 0.0){
+				 //System.out.println(i+" @ utility = "+ arraylist.get(i));
+				 utilitySum += arraylist.get(i);
+				 positiveUtilitiesNumber ++;				 
+			 }
+		}
+		
+		if(positiveUtilitiesNumber!= 0 && utilitySum != 0.0 ){
+			averageUtility = (utilitySum* 1.0) /positiveUtilitiesNumber; 
+		}
+		//System.out.println("Average utility = "+ averageUtility);
+		return averageUtility;
+		
+	}
+	
 	
 }
