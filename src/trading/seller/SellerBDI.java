@@ -81,6 +81,8 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	//initialize the default max number of rounds to 15
 	//private final int numberOfRounds = 5; 
 	
+	private final double betaValue = 0.8;
+	
 	
 	/**
 	 *  The agent body.
@@ -299,15 +301,21 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		//if an order is available
 		if (order != null) {
 			
-			//Strategy 1- Strategy suggested by the available system - test strategy
+			//Strategy 1- Before Learning strategy
 			if (neg_strategy.equals("strategy-1")) {
 				
 				//System.out.println("\nSeller: strategy - 1 @ make proposal");
 				
-				double time_span = order.getDeadline().getTime() - order.getStartTime();
+				/*double time_span = order.getDeadline().getTime() - order.getStartTime();
 				double elapsed_time = getTime() - order.getStartTime();
 				double price_span = order.getLimit() - order.getStartPrice();
-				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();
+				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();*/
+				
+				Offer generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.sellerPreviousOffer, false, betaValue);
+				
+				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
+				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
+				acceptable_price =  (int) generatedOffer.getOfferPrice();
 			}
 
 			//test strategy 2
@@ -424,10 +432,16 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			//Strategy 1- Strategy suggested by the available system - test strategy
 			if (neg_strategy.equals("strategy-1")) {
 				//System.out.println("Seller: strategy - 1 @ execute task");
-				double time_span = order.getDeadline().getTime() - order.getStartTime();
+				/*double time_span = order.getDeadline().getTime() - order.getStartTime();
 				double elapsed_time = getTime() - order.getStartTime();
 				double price_span = order.getLimit() - order.getStartPrice();
-				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();
+				acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();*/
+				
+				Offer generatedOffer = strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.sellerPreviousOffer, false, betaValue);
+				
+				//System.out.println("\nSeller: generated offer = "+generatedOffer.getOfferPrice());
+				//System.out.println("int generated offer = "+(int)generatedOffer.getOfferPrice());
+				acceptable_price =  (int) generatedOffer.getOfferPrice();
 			}
 			
 			//test strategy 2

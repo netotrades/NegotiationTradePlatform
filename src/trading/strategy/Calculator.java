@@ -521,6 +521,89 @@ public class Calculator {
 	
 	/**
 	 *  Generate next offer.
+	 *  @param detReg: detection region. 
+	 *  @param reservePrice: reserve price.
+	 *  @param deadline: deadline. 
+	 *  @param numberOfRows: number Of Rows in the detection region.
+	 *  @param numOfColumns: number of columns in the detection region. 
+	 *  @param prevPrice: previous offer price.
+	 *  @param stepSize: negotiation step size for a round. 
+	 *  @param isBuyer: whether buyer or not.
+	 *  @param offerHistory: offerHistory of the opponent. 
+	 *  @return nextOffer: counter offer for the opponent.  
+	 */
+	public Offer GenerateNextOfferWithoutLearning(Date currentTime, double reservePrice, Date deadline, Offer prevOffer,  boolean isBuyer, ArrayList<Offer> offerHistory, double betaValue) {
+ 
+		double offerPrice = 0.0; double p0 = 0.0;  long t = 0; long t0; double timeRatio = 0.0; 
+		 
+		
+		Offer nextOffer;
+		//buyer's oth round
+		if(offerHistory.size()==1 && isBuyer){
+			System.out.println("Buyer's history size is 1");
+			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime,0);
+			
+		}
+		else if(offerHistory.size()>0 ){
+			 
+ 			p0 = prevOffer.getOfferPrice();
+			t = currentTime.getTime(); //current time
+			t0 = prevOffer.getOfferTime().getTime();
+			
+			//calculate time ratio
+			if(deadline.getTime()!= t0){
+				timeRatio = ((double) (t - t0)/ (deadline.getTime() - t0));
+			}
+			else{
+				timeRatio = 0.0;
+			}
+			
+			System.out.println("isbuyer : "+isBuyer+" time ratio=  "+ timeRatio);
+			 
+			if(timeRatio!= Double.POSITIVE_INFINITY && timeRatio != Double.NEGATIVE_INFINITY){
+				 if((p0 < reservePrice) && isBuyer){
+					offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, betaValue))));
+					System.out.println("Buyer offer cal = "+offerPrice);
+				}
+				else if((p0 > reservePrice) && !isBuyer){
+					offerPrice = (p0 + ((reservePrice - p0)* (Math.pow(timeRatio, betaValue))));
+					System.out.println("Seller offer cal = "+offerPrice);
+				}
+				else{
+					offerPrice = reservePrice;
+					System.out.println("p0 exceed the reserve price "+offerPrice);
+				}
+			}
+			else{
+				offerPrice = reservePrice;
+				System.out.println("error in time ratio "+timeRatio);
+			}	
+			 
+			double opponentLastOffer = offerHistory.get((offerHistory.size()-1)).getOfferPrice();
+			
+			//if generated offer is exceed the opponents last offer
+			if(isBuyer && offerPrice >= opponentLastOffer ){
+				//set the opponent last offer as the next offer
+				offerPrice = opponentLastOffer; //System.out.println("sellers last offer is lower than than the buyers generated value");
+			}
+			else if(!isBuyer && offerPrice <= opponentLastOffer){
+				offerPrice = opponentLastOffer;
+			}
+			
+			
+			//create offer object
+			nextOffer = new Offer(offerPrice,currentTime, (prevOffer.getRoundNumber() + 1));
+			System.out.println("1:" +nextOffer.getOfferPrice());
+		}
+		else{
+			nextOffer = new Offer(prevOffer.getOfferPrice(),currentTime, 0);
+			System.out.println("2:" +nextOffer.getOfferPrice());
+		} 
+		return nextOffer;
+	}
+	
+	/**
+	 *  Generate next offer.
 	 *  @param detReg: detection Region. 
 	 *  @param row: row number of the given cell.
 	 *  @param col: column number of the given cell. 

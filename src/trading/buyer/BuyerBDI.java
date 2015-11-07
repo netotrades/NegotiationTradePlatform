@@ -81,6 +81,7 @@ public class BuyerBDI implements INegotiationAgent {
 	
 	//initialize the default max number of rounds to 15
 	//private final int numberOfRounds = 5;
+	private final double betaValue = 0.8;
  
 	
 	/**
@@ -242,13 +243,21 @@ public class BuyerBDI implements INegotiationAgent {
 		
 		Offer generatedOffer = new Offer();
 		
-		//Strategy 1- Strategy suggested by the available system - test strategy
+		//Strategy 1- Before learning strategy
 		if (neg_strategy.equals("strategy-1")) {
 			//System.out.println("\nBuyer: strategy - 1  @ purchase item");
-			double time_span = order.getDeadline().getTime() - order.getStartTime();
+			/*double time_span = order.getDeadline().getTime() - order.getStartTime();
 			double elapsed_time = getTime() - order.getStartTime();
 			double price_span = order.getLimit() - order.getStartPrice();
-			acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();
+			acceptable_price = (int) (price_span * elapsed_time / time_span) + order.getStartPrice();*/
+			
+			//System.out.println("\n+++++++++++++++++++++++++++++\nBuyer: STRategy - 2 @ Purchase item\n+++++++++++++++++++++++++\n"); 
+			
+			//generate the offers using the model strategy
+			generatedOffer =  strategy_call.callForStrategy1(currentTime,order.getLimit()*1.0,order.getDeadline(), offerHistory,this.buyerPreviousOffer, true, betaValue);
+			//System.out.println("generated offer = "+generatedOffer.getOfferPrice());
+  			 
+			acceptable_price =  (int) generatedOffer.getOfferPrice(); 
 			
 		}
 		

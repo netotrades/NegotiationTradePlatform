@@ -26,7 +26,15 @@ public class StrategyCall {
 		ConcessionStrategy = new AdaptiveConcessionStrategy(calculator);	 		
 	}
 	
-	
+	/**
+	 *  Strategy-1 execution method 
+	 */
+	public Offer callForStrategy1(Date currentTime, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, Offer prevOffer, boolean isBuyer, Double betaValue ) {
+			
+		Offer nextOffer = this.calculator.GenerateNextOfferWithoutLearning(currentTime, reservePrice, deadline, prevOffer, isBuyer, offerHistory, betaValue);
+		 
+		return nextOffer;
+	}	
 
 	/**
 	 *  Strategy-3 execution method 
