@@ -40,7 +40,7 @@
 						<argument name="initial_orders">
 							new Order[]
 							{
-								new Order("All about agents", new Date($properties.clock.getTime()+250000), 500, 550, true, $properties.clock,"strategy-1")
+								new Order("All about agents", new Date($properties.clock.getTime()+250000), 500, 550, true, $properties.clock,"strategy-2")
 							}
 						</argument>
 					</arguments>
@@ -50,7 +50,41 @@
 						<argument name="initial_orders">
 							new Order[]
 							{
-								new Order("All about agents", new Date($properties.clock.getTime()+250000), 600, 530, false, $properties.clock,"strategy-1")
+								new Order("All about agents", new Date($properties.clock.getTime()+250000), 600, 530, false, $properties.clock,"strategy-2")
+							}
+						</argument>
+					</arguments>
+				</component>
+			</components>
+		</configuration>
+				<configuration name="Two buyers and one seller">
+			<components>
+				<component type="Buyer" number="1">
+					<arguments>
+						<argument name="initial_orders">
+							new Order[]
+							{
+								new Order("All about agents", new Date($properties.clock.getTime()+60000), 20, 120, true, $properties.clock,"strategy-3")
+							}
+						</argument>
+					</arguments>
+				</component>
+				<component type="Buyer" number="1">
+					<arguments>
+						<argument name="initial_orders">
+							new Order[]
+							{
+								new Order("All about agents", new Date($properties.clock.getTime()+60000), 50, 110, true, $properties.clock,"strategy-3")
+							}
+						</argument>
+					</arguments>
+				</component>
+				<component type="Seller">
+					<arguments>
+						<argument name="initial_orders">
+							new Order[]
+							{
+								new Order("All about agents", new Date($properties.clock.getTime()+60000), 130, 85, false, $properties.clock,"strategy-3")
 							}
 						</argument>
 					</arguments>

@@ -97,6 +97,7 @@ public class BuyerBDI implements INegotiationAgent {
 		Order[] ios = (Order[]) agent.getArgument("initial_orders");
 		if (ios != null) {
 			for (Order o : ios) {
+				//System.out.println(agent.getAgentName()+" : create goal @ Body, number of goals = "+ ios.length);
 				createGoal(o);
 			}
 		}
@@ -168,9 +169,11 @@ public class BuyerBDI implements INegotiationAgent {
 	@Belief(rawevents = { @RawEvent(ChangeEvent.GOALADOPTED), @RawEvent(ChangeEvent.GOALDROPPED),
 			@RawEvent(ChangeEvent.PARAMETERCHANGED) })
 	public List<Order> getOrders() {
+		
 		// System.out.println("getOrders belief called");
 		List<Order> ret = new ArrayList<Order>();
 		Collection<PurchaseItem> goals = agent.getGoals(PurchaseItem.class);
+		
 		for (PurchaseItem goal : goals) {
 			ret.add(goal.getOrder());
 		}
@@ -190,6 +193,9 @@ public class BuyerBDI implements INegotiationAgent {
 	 */
 	@Plan(trigger = @Trigger(goals = PurchaseItem.class) )
 	protected void purchaseItem(PurchaseItem goal) {
+		
+		//System.out.println(agent.getAgentName()+ " @  Start - purchase item");	
+		
 		int acceptable_price = 0;
 		Order order = goal.getOrder();
 		String neg_strategy = order.getNegotiationStrategy();
@@ -209,20 +215,24 @@ public class BuyerBDI implements INegotiationAgent {
 		Future<Collection<Tuple2<IBuyItemService, Integer>>>	cfp	= new Future<Collection<Tuple2<IBuyItemService, Integer>>>();
 		final CollectionResultListener<Tuple2<IBuyItemService, Integer>>	crl	= new CollectionResultListener<Tuple2<IBuyItemService, Integer>>(services.length, true,
 		new DelegationResultListener<Collection<Tuple2<IBuyItemService, Integer>>>(cfp));
-				
-				
+			
+		 	
 		for(int i=0; i<services.length; i++)
 		{
 			final IBuyItemService	seller	= services[i];
+			
+					//System.out.println(agent.getAgentName()+ " call for proposal\n");
 					
-			seller.callForProposal(order.getName()).addResultListener(new IResultListener<Integer>()
+			seller.callForProposal(agent.getAgentName(),order.getName()).addResultListener(new IResultListener<Integer>()
 			{
 				public void resultAvailable(Integer result)
 				{
 					crl.resultAvailable(new Tuple2<IBuyItemService, Integer>(seller, result));
+					
 					//System.out.println("@BuyerBDI: Seller's make proposal = "+ result);
 					//System.out.println("@BuyerBDI: Seller's round = "+ (currentRound-1)+"\n===========Buyer got the seller's proposall=====================\n");
-					offerHistory.add(new Offer(result,currentTime,(currentRound)));
+					Offer newSellerOffer = new Offer(result,currentTime,currentRound);
+					offerHistory.add(newSellerOffer);
 				}
 						
 				public void exceptionOccurred(Exception exception)
@@ -301,13 +311,13 @@ public class BuyerBDI implements INegotiationAgent {
 		// check whether a winner is available
 		if(proposals.length>0 && proposals[0].getSecondEntity().intValue()<= acceptable_price)
 		{
-			proposals[0].getFirstEntity().acceptProposal(order.getName(), proposals[0].getSecondEntity().intValue()).get();
+			proposals[0].getFirstEntity().acceptProposal(this.agent.getAgentName(),order.getName(), proposals[0].getSecondEntity().intValue()).get();
 			
 			this.averagePriceUtility = (new Calculator()).calculateAverageUtility(utilityPriceArray);
 			this.averageTimeUtility = (new Calculator()).calculateAverageUtility(utilityTimeArray);
 			
-			System.out.println("Buyer: average price utility = "+ this.averagePriceUtility );
-			System.out.println("Buyer: average time utility = "+ this.averageTimeUtility );
+			//System.out.println("Buyer: average price utility = "+ this.averagePriceUtility );
+			//System.out.println("Buyer: average time utility = "+ this.averageTimeUtility );
 			
 			generateNegotiationReport(order, proposals, acceptable_price);
 			// If contract-net succeeds, store result in order object.
@@ -318,8 +328,12 @@ public class BuyerBDI implements INegotiationAgent {
 		} else {
 
 			for (int i = 0; i < services.length; i++) {
-				services[i].setacceptablePrice(order, order.getName(), acceptable_price);
+				
+				//System.out.println(agent.getAgentName()+ "Set acceptable price @ Seller");
+				
+				services[i].setacceptablePrice(this.agent.getAgentName(),order, order.getName(), acceptable_price, this.offerHistory.get(this.offerHistory.size()-1));
 			}
+			
 			NegotiationReport nr = generateNegotiationReport(order, proposals, acceptable_price);
 			//System.out.println("BUYER " + nr.toString());
 			try {
@@ -330,6 +344,8 @@ public class BuyerBDI implements INegotiationAgent {
 			throw new PlanFailureException();
 		}
 		//System.out.println("result: "+cnp.getParameter("result").getValue());
+		//System.out.println(agent.getAgentName()+ " @  end - purchase item");	
+		
 		
 	}
 
@@ -375,18 +391,26 @@ public class BuyerBDI implements INegotiationAgent {
 	protected NegotiationReport generateNegotiationReport(Order order, Tuple2<IBuyItemService, Integer>[] proposals,
 			double acceptable_price) {
 		String report = "Accepable price: " + acceptable_price + ", proposals: ";
+		
 		if (proposals != null) {
+			
 			for (int i = 0; i < proposals.length; i++) {
 				report += proposals[i].getSecondEntity() + "-" + proposals[i].getFirstEntity().toString();
+				
+				//System.out.println(this.agent.getAgentName() +" "+i+ "- report = "+ report);
+				
 				if (i + 1 < proposals.length)
 					report += ", ";
 			}
 		} else {
 			report += "No seller found, purchase failed.";
 		}
+		
 		NegotiationReport nr = new NegotiationReport(order, report, getTime());
 		// System.out.println("REPORT of agent: "+getAgentName()+" "+report);
+		
 		reports.add(nr);
+		
 		return nr;
 	}
 

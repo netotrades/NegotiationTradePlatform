@@ -1,7 +1,10 @@
 package trading;
  
 
+import java.util.Date;
+
 import trading.common.Order;
+import trading.strategy.Offer;
 import jadex.commons.future.IFuture;
 
 /**
@@ -14,7 +17,7 @@ public interface IBuyItemService
 	 *  @param name	The item name.
 	 *  @return The price.
 	 */
-	public IFuture<Integer>	callForProposal(String name);
+	public IFuture<Integer>	callForProposal(String agentName,String name);
 
 	/**
 	 *  Buy an item
@@ -22,14 +25,14 @@ public interface IBuyItemService
 	 *  @param price	The price to pay.
 	 *  @return A future indicating if the transaction was successful.
 	 */
-	public IFuture<Void> acceptProposal(String name, int price);
+	public IFuture<Void> acceptProposal(String agentName,String name, int price);
 	
 	/**
 	 * Set seller's offer history
 	 * @param name
 	 * @param price
 	 */
-	public void setacceptablePrice(Order order, String name, int price);
+	public void setacceptablePrice(String agentName,Order order, String name, int price, Offer sellerPrevOffer);
 	
 	
 	
