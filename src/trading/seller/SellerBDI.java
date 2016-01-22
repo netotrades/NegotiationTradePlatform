@@ -31,7 +31,7 @@ import jadex.micro.annotation.RequiredServices;
 import trading.IBuyItemService;
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
-import trading.common.BuyerRequests;
+import trading.common.AgentRequests;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order;
@@ -64,7 +64,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	
 	@Belief
 	protected List<NegotiationReport> reports = new ArrayList<NegotiationReport>();
-	private Queue<BuyerRequests> buyerRequestQueue = new LinkedList<BuyerRequests>();
+	private Queue<AgentRequests> buyerRequestQueue = new LinkedList<AgentRequests>();
  
 	protected Gui gui;
 	
@@ -656,7 +656,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	 */
 	public IFuture<Integer> callForProposal(String agentName,String name) {
 		
-		this.buyerRequestQueue.add(new BuyerRequests(agentName, name));
+		this.buyerRequestQueue.add(new AgentRequests(agentName, name));
 		
 		//System.out.println("Entered buyer agent to queue = "+ agentName);
 		
@@ -709,7 +709,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	 */
 	public IFuture<Void> acceptProposal(String agentName, String name, int price) {
 		
-		this.buyerRequestQueue.add(new BuyerRequests(agentName, name));
+		this.buyerRequestQueue.add(new AgentRequests(agentName, name));
 		
 		final Future<Void> ret = new Future<Void>();
 		ExecuteTask goal = new ExecuteTask(name, price);

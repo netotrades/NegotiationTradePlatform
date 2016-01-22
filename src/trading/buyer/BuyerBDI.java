@@ -30,6 +30,7 @@ import jadex.micro.annotation.RequiredServices;
 import trading.IBuyItemService;
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
+import trading.common.AgentRequests;
 import trading.common.ExcelWriter;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
@@ -45,7 +46,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.swing.SwingUtilities;
 
@@ -62,6 +65,8 @@ public class BuyerBDI implements INegotiationAgent {
 	
 	@Belief
 	protected List<NegotiationReport> reports = new ArrayList<NegotiationReport>();	
+	private Queue<AgentRequests> sellerRequestQueue = new LinkedList<AgentRequests>();
+	
 	protected Gui gui;
 	
 	//seller's historical offers

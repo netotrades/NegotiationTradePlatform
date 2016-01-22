@@ -1,12 +1,12 @@
 package trading.common;
 
-public class BuyerRequests {
+public class AgentRequests {
 
 	private String agentName;
 	private String orderName;
 	
 	//constructor 1
-	public BuyerRequests(String agentName, String orderName){
+	public AgentRequests(String agentName, String orderName){
 		this.agentName = agentName;
 		this.orderName = orderName;
 	}
