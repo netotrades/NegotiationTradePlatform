@@ -32,6 +32,7 @@ import trading.IBuyItemService;
 import trading.INegotiationAgent;
 import trading.INegotiationGoal;
 import trading.common.AgentRequests;
+import trading.common.AgentRequests;
 import trading.common.Gui;
 import trading.common.NegotiationReport;
 import trading.common.Order;
@@ -95,6 +96,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	
 	private ArrayList<Double> utilityPriceArray = new ArrayList<Double>();
 	private ArrayList<Double> utilityTimeArray = new ArrayList<Double>();
+	
 	private double averagePriceUtility = 0.0;
 	private double averageTimeUtility = 0.0;
 	
@@ -316,6 +318,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		
 		//System.out.println("order detailArray size = "+ this.orderDetailsArrayList.size());
 		
+		//if the order has not entered in to the order list of the buyer
 		if(this.getIndexOfOrder(order.getName()) == -1){
 			//System.out.println(order.getName() + "Order index is added to "+ this.orderDetailsArrayList.size());
 			this.orderDetailsArrayList.add(this.orderDetailsArrayList.size(),new OrderDetails(order));
@@ -324,7 +327,10 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		int orderIndex = this.getIndexOfOrder(order.getName());
 		int opponentIndex = -1;
 		
+		//if the order index is a positive or 0
 		if(orderIndex >-1){
+			
+			//find the opponent index in the opponent array list
 			opponentIndex = this.orderDetailsArrayList.get(orderIndex).getOpponentIndexInOpponentDetailArrayList(this.buyerRequestQueue.peek().getAgentName());
 		}
 		//System.out.println(orderIndex+ " - "+ opponentIndex);		
@@ -350,7 +356,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		 }
 		//System.out.println("current round = "+ this.currentRound);
 		
-		
+		//set the previous offer of the seller
 		if(orderIndex > -1 && opponentIndex > -1){
 			this.setSellerPreviousOffer(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentPreviousOffer());
 			
@@ -410,10 +416,11 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			//set the buyer current offer as the previous offer of the buyer
 			//this.setSellerPreviousOffer(acceptable_price, this.currentTime, this.currentRound);		
 			
-			this.utilityPriceArray.add(generatedOffer.getUtilityPriceValue()); 
-			this.utilityTimeArray.add(generatedOffer.getUtilityTimeValue());
+			//this.utilityPriceArray.add(generatedOffer.getUtilityPriceValue()); 
+			//this.utilityTimeArray.add(generatedOffer.getUtilityTimeValue());
 			
 			if(orderIndex > -1 && opponentIndex > -1 && this.currentRound > 0){
+				
 				this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().add(generatedOffer.getUtilityPriceValue());
 				this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().add(generatedOffer.getUtilityTimeValue());
 				
@@ -428,7 +435,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 			
 			// Store proposal data in plan parameters.
 			goal.setProposal(acceptable_price);  
-			String report = "Made proposal: "+acceptable_price +" For Buyer : "+this.buyerRequestQueue.peek().getAgentName();
+			String report = "Made proposal: "+acceptable_price +" For Buyer : " +this.buyerRequestQueue.peek().getAgentName();
 			
 			//System.out.println(this.agent.getAgentName() +" : 2. report = "+ report);
 			
@@ -626,6 +633,9 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		
 	}
 	
+	/**
+	 * Get the index of the given order's name in the order detail array list.
+	 */
 	public int getIndexOfOrder(String orderName){
 		int indexAvailable = -1;
 		if(this.orderDetailsArrayList.size() >0){
@@ -675,7 +685,6 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 		});
 		return ret;
 	}
-	
 	
 	/**
 	 * set the sellers current offer to the previous offer.
