@@ -344,7 +344,7 @@ public class BuyerBDI implements INegotiationAgent {
 			}
 		});
 				
-		System.out.println(" \nproposals size = "+ proposals.length);
+		//System.out.println(" \nproposals size = "+ proposals.length);
 			
 		//System.out.println("index of order = "+ this.getIndexOfOrder(order.getName()));
 		
@@ -363,11 +363,11 @@ public class BuyerBDI implements INegotiationAgent {
 		//generate counter offers for all the proposals received by the sellers
 		for(int k = 0; k < proposals.length; k++){
 			
-			System.out.println(" \n"+k);
+			//System.out.println(" \n"+k);
 			//---------get seller agent's name-----------------------------
 			String firstEntity = proposals[k].getFirstEntity().toString();
 			
-			System.out.println(" first entity = "+firstEntity);
+			//System.out.println(" first entity = "+firstEntity);
 			
 			//split the first entity string from the character @
 			String[] parts = firstEntity.split("@"); 
@@ -375,11 +375,11 @@ public class BuyerBDI implements INegotiationAgent {
 			//1st part contains the agent name
 			String agentName = parts[1];
 			
-			System.out.println(" agent name = "+agentName);
+			//System.out.println(" agent name = "+agentName);
 			
 			//String orderName = order.getName(); 
 			
-			System.out.println("agent's proposal = "+ proposals[k].getSecondEntity().intValue());
+			//System.out.println("agent's proposal = "+ proposals[k].getSecondEntity().intValue());
 			
 			//set offer history data to the opponent offer history list
 			setOfferHistoryData(agentName, order.getName(), proposals[k].getSecondEntity().intValue());					
@@ -397,7 +397,7 @@ public class BuyerBDI implements INegotiationAgent {
 				opponentIndex = this.orderDetailsArrayList.get(orderIndex).getOpponentIndexInOpponentDetailArrayList(agentName);
 			}
 			
-			System.out.println(orderIndex+ " - "+ opponentIndex);		
+			//System.out.println(orderIndex+ " - "+ opponentIndex);		
 	 
 
 			
@@ -410,13 +410,13 @@ public class BuyerBDI implements INegotiationAgent {
 					//there is a previous offer of the buyer and retrieve it from the opponent offer history data
 					this.setBuyerPreviousOffer(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentPreviousOffer());
 					
-					System.out.println("previous offer = "+ this.buyerPreviousOffer.getOfferPrice()+" @ round = "+this.currentRound);
+					//System.out.println("previous offer = "+ this.buyerPreviousOffer.getOfferPrice()+" @ round = "+this.currentRound);
 				
 				}else{
 					
 					//There is no previous offer of the buyer @ round 0 therefore set it as the starting offer
 					this.setBuyerPreviousOffer(this.historyPrice, this.currentTime,this.currentRound);
-					System.out.println("previous offer = "+ this.buyerPreviousOffer.getOfferPrice()+" @ round = "+this.currentRound);
+					//System.out.println("previous offer = "+ this.buyerPreviousOffer.getOfferPrice()+" @ round = "+this.currentRound);
 					
 				}		
 			}
@@ -463,6 +463,18 @@ public class BuyerBDI implements INegotiationAgent {
 			  			 
 				acceptable_price =  (int) generatedOffer.getOfferPrice();
 			} 
+			
+			if(orderIndex > -1 && opponentIndex > -1 && this.currentRound > 0){
+				
+				this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().add(generatedOffer.getUtilityPriceValue());
+				this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().add(generatedOffer.getUtilityTimeValue());
+				
+				/*System.out.println(generatedOffer.getUtilityPriceValue()+" - "+ generatedOffer.getUtilityTimeValue());
+				System.out.println(	this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().get(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().size()-1));
+				System.out.println(	this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().get(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().size()-1));
+				*/
+			} 
+			
 			//System.out.println("successfully calculated offer = "+ acceptable_price);
 			 
 			
@@ -472,7 +484,7 @@ public class BuyerBDI implements INegotiationAgent {
 			//System.out.println("Buyer: @ round= "+this.currentRound+" , offer = "+ acceptable_price);
 			Offer buyerPrevOffer = new Offer(acceptable_price, generatedOffer.getOfferTime(), generatedOffer.getRoundNumber());
 			
-			System.out.println("Buyer newly Generated offer = "+buyerPrevOffer.getOfferPrice()+" @ round "+ buyerPrevOffer.getRoundNumber()+" for seller =  "+agentName);		
+			//System.out.println("Buyer newly Generated offer = "+buyerPrevOffer.getOfferPrice()+" @ round "+ buyerPrevOffer.getRoundNumber()+" for seller =  "+agentName);		
 			
 			//set the buyer previous offer at the corresponding opponent history data
 			if(orderIndex > -1 && opponentIndex > -1){
@@ -500,6 +512,21 @@ public class BuyerBDI implements INegotiationAgent {
 						
 					//this.averagePriceUtility = (new Calculator()).calculateAverageUtility(utilityPriceArray);
 					//this.averageTimeUtility = (new Calculator()).calculateAverageUtility(utilityTimeArray);
+					
+					if(orderIndex > -1 && opponentIndex > -1 && this.currentRound > 0){
+						
+						this.averagePriceUtility = (new Calculator()).calculateAverageUtility(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray());
+						this.averageTimeUtility = (new Calculator()).calculateAverageUtility(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray());
+											
+						this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).setAveragePriceUtility(this.averagePriceUtility);
+						this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).setAverageTimeUtility(this.averageTimeUtility);
+						
+						/*System.out.println(generatedOffer.getUtilityPriceValue()+" - "+ generatedOffer.getUtilityTimeValue());
+						System.out.println(	this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().get(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityPriceArray().size()-1));
+						System.out.println(	this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().get(this.orderDetailsArrayList.get(orderIndex).getOpponentDetailArrayList().get(opponentIndex).getAgentUtilityTimeArray().size()-1));
+						*/
+					}
+					
 						
 					//System.out.println("Buyer: average price utility = "+ this.averagePriceUtility );
 					//System.out.println("Buyer: average time utility = "+ this.averageTimeUtility );
@@ -508,20 +535,20 @@ public class BuyerBDI implements INegotiationAgent {
 						
 						
 					 
-					System.out.println("isdone = false");
+					//System.out.println("isdone = false");
 					order.setState(Order.DONE);
 					order.setExecutionPrice(proposals[k].getSecondEntity());
 					order.setExecutionDate(new Date(getTime()));
 					this.isDone = true;
-					System.out.println("isdone = true");
+					//System.out.println("isdone = true");
 							
 					 
 						
 						
 					} else if(!this.isDone) {
 
-						 	System.out.println("service length = "+  services.length);
-							System.out.println(agent.getAgentName()+ "Set acceptable price " + acceptable_price);
+						 	//System.out.println("service length = "+  services.length);
+							//System.out.println(agent.getAgentName()+ "Set acceptable price " + acceptable_price);
 							
 							services[k].setacceptablePrice(this.agent.getAgentName(),order, order.getName(), acceptable_price, this.offerHistory.get(this.offerHistory.size()-1));
 					 
@@ -727,7 +754,7 @@ public class BuyerBDI implements INegotiationAgent {
 	protected NegotiationReport generateNegotiationReport(Order order, Tuple2<IBuyItemService, Integer> proposal,
 			double acceptable_price) {
 		
-		System.out.println("Negotiation Report generation Method");
+		//System.out.println("Negotiation Report generation Method");
 		
 		String report = "Accepable price: " + acceptable_price + ", proposals: ";
 		

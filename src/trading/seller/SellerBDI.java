@@ -94,8 +94,8 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 	
 	private final double betaValue = 0.8;
 	
-	private ArrayList<Double> utilityPriceArray = new ArrayList<Double>();
-	private ArrayList<Double> utilityTimeArray = new ArrayList<Double>();
+	//private ArrayList<Double> utilityPriceArray = new ArrayList<Double>();
+	//private ArrayList<Double> utilityTimeArray = new ArrayList<Double>();
 	
 	private double averagePriceUtility = 0.0;
 	private double averageTimeUtility = 0.0;
