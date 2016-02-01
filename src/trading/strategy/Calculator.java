@@ -813,7 +813,7 @@ public class Calculator {
 		//System.out.println("a = "+a);
 		
 		//calculate b
-		b = ((0.5* risk * opponentDeadline.getTime()) + ((1+risk)* currentTime.getTime()));
+		b = ((0.5* risk * opponentDeadline.getTime()) + ((1-risk)* currentTime.getTime()));
 		//System.out.println("b = "+b);
 		
 		//calculate c
