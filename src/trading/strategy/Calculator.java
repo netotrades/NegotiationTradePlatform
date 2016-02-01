@@ -819,7 +819,8 @@ public class Calculator {
 		//calculate c
 		c= opponentDeadline.getTime()* (-1.0);
 		//System.out.println("c = "+c);
-				
+		
+		//take roots in to the array list
 		ArrayList<Double> roots = this.calculateTheRoots(a, b, c); 
 		
 		//if there are roots

@@ -76,7 +76,7 @@
 						<argument name="initial_orders">
 							new Order[]
 							{
-								new Order("All about agents", new Date($properties.clock.getTime()+200000), 500, 679, true, $properties.clock,"strategy-3")
+								new Order("All about agents", new Date($properties.clock.getTime()+200000), 500, 670, true, $properties.clock,"strategy-3")
 							}
 						</argument>
 					</arguments>
