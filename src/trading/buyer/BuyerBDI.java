@@ -442,7 +442,7 @@ public class BuyerBDI implements INegotiationAgent {
 						
 			}
 					
-			//test strategy 2
+			//test strategy 2 - Main strategy
 			else if (neg_strategy.equals("strategy-2")) {
 				//System.out.println("\n+++++++++++++++++++++++++++++\nBuyer: STRategy - 2 @ Purchase item\n+++++++++++++++++++++++++\n"); 
 						
@@ -453,7 +453,7 @@ public class BuyerBDI implements INegotiationAgent {
 				acceptable_price =  (int) generatedOffer.getOfferPrice(); 
 			}
 					
-			//Strategy 3- Main strategy
+			//Strategy 3
 			else if (neg_strategy.equals("strategy-3")) { 
 				//System.out.println("\n+++++++++++++++++++++++++++++\nBuyer: STRategy - 3 @ Purchase item\n+++++++++++++++++++++++++\n"); 
 						

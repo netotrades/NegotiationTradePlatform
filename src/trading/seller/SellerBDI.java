@@ -384,7 +384,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				acceptable_price =  (int) generatedOffer.getOfferPrice();
 			}
 
-			//test strategy 2
+			//test strategy 2- Main strategy
 			else if (neg_strategy.equals("strategy-2")) {
 				
 				//System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 2  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");
@@ -398,7 +398,7 @@ public class SellerBDI implements IBuyItemService, INegotiationAgent {
 				 
 			} 
 			
-			//Strategy 3- Main strategy
+			//Strategy 3
 			else if (neg_strategy.equals("strategy-3")) { 
 				 
 				//System.out.println("\n+++++++++++++++++++++++++++++++++++\nseller: strategy - 3  @ make proposal \n+++++++++++++++++++++++++++++++++\n ");

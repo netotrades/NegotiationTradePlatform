@@ -132,7 +132,7 @@ public class StrategyCall {
 	}
 	
 	/**
-	 *  Strategy-3 execution method 
+	 *  Strategy-2 execution method 
 	 */
 	public Offer callForStrategy2(Date currentTime,DetectionRegion detectionRegion, double startPrice, double reservePrice, Date deadline, ArrayList<Offer> offerHistory, int currentRound , int numberOfRows, int numberOfColumns, Offer prevOffer, boolean isBuyer) {
 		
